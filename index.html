@@ -92,6 +92,7 @@
 
     #app {
       display: grid;
+      grid-template-columns: minmax(0, 1fr);
       grid-template-rows: auto 1fr auto;
       height: 100%;
       min-width: 320px;
@@ -142,7 +143,7 @@
 
     .workspace {
       display: grid;
-      grid-template-columns: minmax(255px, 0.8fr) minmax(560px, 1.65fr) minmax(315px, 0.95fr);
+      grid-template-columns: minmax(285px, 0.8fr) minmax(625px, 1.75fr) minmax(330px, 0.85fr);
       gap: 10px;
       min-height: 0;
       padding: 10px;
@@ -151,6 +152,7 @@
     .panel,
     .sim-panel {
       min-height: 0;
+      min-width: 0;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: var(--panel);
@@ -175,9 +177,11 @@
     }
 
     .panel-header strong {
+      flex: 0 0 auto;
       color: var(--green);
       font-size: 13px;
       text-transform: uppercase;
+      white-space: nowrap;
     }
 
     .panel-header small {
@@ -208,7 +212,7 @@
 
     .sim-panel {
       display: grid;
-      grid-template-rows: 1fr auto;
+      grid-template-rows: minmax(0, 1fr) auto;
       overflow: hidden;
       background: #010303;
     }
@@ -216,6 +220,7 @@
     #game {
       position: relative;
       min-height: 0;
+      overflow: hidden;
       background: #010303;
     }
 
@@ -265,7 +270,9 @@
 
     .side-tabs {
       display: flex;
+      flex-wrap: wrap;
       gap: 4px;
+      justify-content: flex-end;
     }
 
     .tab-button {
@@ -381,7 +388,7 @@
       text-align: center;
     }
 
-    @media (max-width: 1180px) {
+    @media (max-width: 1220px) {
       body {
         overflow: auto;
       }
@@ -393,11 +400,15 @@
 
       .workspace {
         grid-template-columns: 1fr;
-        grid-template-rows: auto minmax(560px, 68vh) minmax(560px, 70vh);
+        grid-template-rows: minmax(260px, 34vh) minmax(520px, 66vh) minmax(560px, 70vh);
       }
 
       .panel {
-        min-height: 320px;
+        min-height: 260px;
+      }
+
+      .sim-panel {
+        min-height: 520px;
       }
     }
 
@@ -414,12 +425,26 @@
       }
 
       .toolbar {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         justify-content: flex-start;
+        width: 100%;
+      }
+
+      .toolbar button {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .workspace {
         padding: 8px;
-        grid-template-rows: auto minmax(420px, 58vh) minmax(560px, 72vh);
+        grid-template-rows: minmax(240px, 32vh) minmax(330px, 46vh) minmax(560px, 72vh);
+      }
+
+      .sim-panel {
+        min-height: 330px;
       }
 
       .program-controls {
@@ -717,6 +742,7 @@
       0xA6: ["LDX", "zp", 2],
       0xA9: ["LDA", "imm", 2],
       0xAD: ["LDA", "abs", 3],
+      0xAE: ["LDX", "abs", 3],
       0xBD: ["LDA", "abs,X", 3],
       0xC5: ["CMP", "zp", 2],
       0xC6: ["DEC", "zp", 2],
@@ -1123,6 +1149,12 @@
           break;
         case 0xA6:
           target = cpu.memory[(pc + 1) & 0xFFFF];
+          cpu.x = cpu.memory[target];
+          setZN(cpu, cpu.x);
+          data = cpu.x;
+          break;
+        case 0xAE:
+          target = read16(cpu, pc + 1);
           cpu.x = cpu.memory[target];
           setZN(cpu, cpu.x);
           data = cpu.x;
@@ -1656,6 +1688,9 @@
         this.cpu = null;
         this.labels = {};
         this.flash = 0;
+        this.packetT = 0;
+        this.lastDrawKey = "";
+        this.needsDraw = true;
       }
 
       create() {
@@ -1666,46 +1701,52 @@
         refreshAll();
       }
 
-      makeText(key, x, y, text, size, color) {
-        this.labels[key] = this.add.text(x, y, text, {
+      makeText(key, x, y, text, size, color, originX, originY) {
+        const label = this.add.text(x, y, text, {
           fontFamily: "Cascadia Mono, Consolas, monospace",
           fontSize: String(size || 22) + "px",
           color: color || "#63ffbd",
           resolution: 2
         });
+        label.setOrigin(originX == null ? 0 : originX, originY == null ? 0 : originY);
+        this.labels[key] = label;
+        return label;
       }
 
       makeLabels() {
-        this.makeText("titleFlags", 52, 65, "NV-BDIZC", 25);
-        this.makeText("flags", 72, 104, "00000000", 25);
-        this.makeText("pLabel", 54, 147, "P Status", 22);
-        this.makeText("pcLabel", 54, 223, "PC", 26);
-        this.makeText("pc", 122, 224, "0300", 25);
-        this.makeText("addr", 116, 502, "0300", 24);
-        this.makeText("addrLabel", 91, 546, "Address", 24);
-        this.makeText("memTitle", 337, 398, "Memory", 25);
-        this.makeText("memory", 320, 438, "0300: 00", 24);
-        this.makeText("accBits", 365, 132, "0000 0000", 26);
-        this.makeText("accHex", 362, 178, "00", 25);
-        this.makeText("accLabel", 423, 180, "Accumulator", 24);
-        this.makeText("alu", 585, 94, "ALU", 27);
-        this.makeText("x", 858, 110, "00", 26);
-        this.makeText("xLabel", 920, 118, "X reg.", 24);
-        this.makeText("y", 858, 196, "00", 26);
-        this.makeText("yLabel", 920, 204, "Y reg.", 24);
-        this.makeText("decoder", 807, 288, "READY", 24);
-        this.makeText("decoderLabel", 858, 341, "Decoder", 24);
-        this.makeText("stack", 828, 435, "01FF: FF", 24);
-        this.makeText("stackLabel", 890, 610, "Stack", 24);
-        this.makeText("data", 692, 520, "00", 25);
-        this.makeText("dataLabel", 679, 568, "Data", 24);
-        this.makeText("phaseFetch", 626, 636, "Fetch", 24);
-        this.makeText("phaseExec", 626, 684, "Execute", 24);
-        this.makeText("hint", 28, 650, "Press SPACE to pause", 20, "#7dfbd0");
+        this.makeText("titleFlags", 151, 82, "NV-BDIZC", 25, null, 0.5, 0);
+        this.makeText("flags", 151, 141, "00000000", 25, null, 0.5, 0.5);
+        this.makeText("pLabel", 151, 180, "P Status", 22, null, 0.5, 0.5);
+        this.makeText("pcLabel", 74, 284, "PC", 26, null, 0.5, 0.5);
+        this.makeText("pc", 182, 285, "0300", 25, null, 0.5, 0.5);
+        this.makeText("addr", 182, 550, "0300", 24, null, 0.5, 0.5);
+        this.makeText("addrLabel", 182, 592, "Address", 24, null, 0.5, 0.5);
+        this.makeText("addrReg", 398, 351, "0300", 24, null, 0.5, 0.5);
+        this.makeText("addrRegLabel", 398, 316, "Address Register", 24, null, 0.5, 0.5);
+        this.makeText("memTitle", 447, 404, "Memory", 25, null, 0.5, 0.5);
+        this.makeText("memory", 350, 452, "0300: 00", 22);
+        this.makeText("accBits", 484, 152, "0000 0000", 26, null, 0.5, 0.5);
+        this.makeText("accHex", 417, 212, "00", 25, null, 0.5, 0.5);
+        this.makeText("accLabel", 463, 212, "Accumulator", 22, null, 0, 0.5);
+        this.makeText("alu", 705, 118, "ALU", 27, null, 0.5, 0.5);
+        this.makeText("x", 885, 149, "00", 26, null, 0.5, 0.5);
+        this.makeText("xLabel", 934, 149, "X reg.", 24, null, 0, 0.5);
+        this.makeText("y", 885, 239, "00", 26, null, 0.5, 0.5);
+        this.makeText("yLabel", 934, 239, "Y reg.", 24, null, 0, 0.5);
+        this.makeText("decoder", 888, 343, "READY", 23, null, 0.5, 0.5);
+        this.makeText("decoderLabel", 888, 390, "Decoder", 24, null, 0.5, 0.5);
+        this.makeText("stack", 808, 456, "01FF: FF", 23);
+        this.makeText("stackLabel", 892, 626, "Stack", 24, null, 0.5, 0.5);
+        this.makeText("data", 727, 549, "00", 25, null, 0.5, 0.5);
+        this.makeText("dataLabel", 727, 594, "Data", 24, null, 0.5, 0.5);
+        this.makeText("phaseFetch", 695, 635, "Fetch", 24, null, 0.5, 0.5);
+        this.makeText("phaseExec", 695, 685, "Execute", 24, null, 0.5, 0.5);
+        this.makeText("hint", 48, 646, "Press SPACE to pause", 20, "#7dfbd0");
       }
 
       setCpu(cpu) {
         this.cpu = cpu;
+        this.needsDraw = true;
         if (this.labels.flags) {
           this.updateLabels();
         }
@@ -1720,11 +1761,13 @@
         this.labels.pc.setText(hex(cpu.pc, 4));
         const busAddress = cpu.lastStep && cpu.lastStep.target != null ? cpu.lastStep.target : cpu.pc;
         this.labels.addr.setText(hex(busAddress & 0xFFFF, 4));
+        this.labels.addrReg.setText(hex(busAddress & 0xFFFF, 4));
         this.labels.accBits.setText(cpu.a.toString(2).padStart(8, "0").replace(/(.{4})/, "$1 "));
         this.labels.accHex.setText(hex(cpu.a, 2));
         this.labels.x.setText(hex(cpu.x, 2));
         this.labels.y.setText(hex(cpu.y, 2));
-        this.labels.decoder.setText(currentInstruction(cpu).slice(0, 13));
+        const instruction = currentInstruction(cpu);
+        this.labels.decoder.setText(instruction.length > 14 ? instruction.slice(0, 13) + "." : instruction);
         this.labels.data.setText(hex(cpu.lastStep && cpu.lastStep.data != null ? cpu.lastStep.data : cpu.memory[cpu.pc], 2));
         this.labels.memory.setText(memoryWindow(cpu));
         this.labels.stack.setText(stackWindow(cpu));
@@ -1733,9 +1776,28 @@
       }
 
       update(time) {
-        this.flash = (Math.sin(time / 115) + 1) / 2;
-        this.drawDiagram();
-        this.updateLabels();
+        const animate = this.shouldAnimate();
+        this.flash = animate ? (Math.sin(time / 180) + 1) / 2 : 0;
+        this.packetT = animate ? (time % 1600) / 1600 : 0;
+        const cpu = this.cpu;
+        const drawKey = [
+          animate ? Math.floor(time / 90) : "static",
+          app.running,
+          cpu ? cpu.cycles : "none",
+          cpu ? cpu.halted : "none",
+          cpu && cpu.lastStep ? cpu.lastStep.mnemonic : "none"
+        ].join(":");
+        if (this.needsDraw || drawKey !== this.lastDrawKey) {
+          this.drawDiagram();
+          this.updateLabels();
+          this.lastDrawKey = drawKey;
+          this.needsDraw = false;
+        }
+      }
+
+      shouldAnimate() {
+        const cpu = this.cpu;
+        return Boolean(app.running && cpu && !cpu.halted && cpu.lastStep && cpu.lastStep.mnemonic !== "READY");
       }
 
       line(points, color, alpha, width) {
@@ -1757,60 +1819,94 @@
         if (!active) {
           return;
         }
-        this.gfx.fillStyle(AMBER_HEX, 0.07 + this.flash * 0.08);
+        const pulse = this.shouldAnimate() ? this.flash : 0;
+        this.gfx.fillStyle(AMBER_HEX, 0.07 + pulse * 0.06);
         this.gfx.fillRect(x, y, w, h);
-        this.box(x, y, w, h, AMBER_HEX, 0.75 + this.flash * 0.25, 4);
+        this.box(x, y, w, h, AMBER_HEX, 0.72 + pulse * 0.2, 4);
+      }
+
+      pathPoint(points, progress) {
+        const lengths = [];
+        let total = 0;
+        for (let index = 2; index < points.length; index += 2) {
+          const dx = points[index] - points[index - 2];
+          const dy = points[index + 1] - points[index - 1];
+          const length = Math.hypot(dx, dy);
+          lengths.push(length);
+          total += length;
+        }
+        let distance = (progress % 1) * total;
+        for (let index = 0; index < lengths.length; index += 1) {
+          if (distance <= lengths[index]) {
+            const start = index * 2;
+            const ratio = lengths[index] === 0 ? 0 : distance / lengths[index];
+            return {
+              x: points[start] + (points[start + 2] - points[start]) * ratio,
+              y: points[start + 1] + (points[start + 3] - points[start + 1]) * ratio
+            };
+          }
+          distance -= lengths[index];
+        }
+        return { x: points[points.length - 2], y: points[points.length - 1] };
+      }
+
+      packet(points, offset) {
+        const point = this.pathPoint(points, this.packetT + offset);
+        this.gfx.fillStyle(AMBER_HEX, 0.9);
+        this.gfx.fillCircle(point.x, point.y, 5);
       }
 
       drawDiagram() {
         const cpu = this.cpu;
         const active = cpu && cpu.lastStep ? cpu.lastStep.mnemonic : "";
+        const animate = this.shouldAnimate();
         this.gfx.clear();
         this.gfx.fillStyle(0x010303, 1);
         this.gfx.fillRect(0, 0, 1024, 720);
 
-        this.line([260, 88, 260, 272, 722, 272, 722, 492], GREEN_HEX, 0.92);
-        this.line([260, 272, 334, 272], GREEN_HEX, 0.92);
-        this.line([260, 100, 334, 150], GREEN_HEX, 0.92);
-        this.line([259, 518, 318, 518], GREEN_HEX, 0.92);
-        this.line([144, 250, 144, 490, 260, 518], GREEN_HEX, 0.92);
-        this.line([530, 150, 722, 150, 850, 126], GREEN_HEX, 0.92);
-        this.line([530, 190, 722, 190, 850, 210], GREEN_HEX, 0.92);
-        this.line([722, 292, 798, 292], GREEN_HEX, 0.92);
-        this.line([722, 492, 682, 492, 682, 520], GREEN_HEX, 0.92);
-        this.line([530, 514, 660, 514], GREEN_HEX, 0.92);
+        this.line([256, 141, 300, 141, 300, 550, 332, 550], GREEN_HEX, 0.88);
+        this.line([246, 285, 300, 285], GREEN_HEX, 0.88);
+        this.line([246, 550, 332, 550], GREEN_HEX, 0.88);
+        this.line([300, 351, 333, 351], GREEN_HEX, 0.88);
+        this.line([460, 351, 740, 351, 740, 343, 790, 343], GREEN_HEX, 0.88);
+        this.line([562, 550, 690, 550], GREEN_HEX, 0.88);
+        this.line([587, 152, 620, 152], GREEN_HEX, 0.88);
+        this.line([790, 145, 850, 145], GREEN_HEX, 0.88);
+        this.line([790, 235, 850, 235], GREEN_HEX, 0.88);
+        this.line([705, 228, 705, 520], GREEN_HEX, 0.88);
+        this.line([764, 550, 790, 550], GREEN_HEX, 0.88);
 
-        const busGlow = 0.25 + this.flash * 0.45;
-        this.line([145, 490, 260, 518, 318, 518], BLUE_HEX, busGlow, 5);
-        this.line([530, 514, 660, 514], BLUE_HEX, busGlow, 5);
+        if (animate) {
+          const busGlow = 0.22 + this.flash * 0.38;
+          this.line([182, 310, 182, 550, 332, 550], BLUE_HEX, busGlow, 5);
+          this.line([562, 550, 690, 550], BLUE_HEX, busGlow, 5);
+          this.packet([182, 310, 182, 550, 332, 550], 0);
+          this.packet([562, 550, 690, 550], 0.35);
+        }
 
-        this.box(40, 103, 202, 48);
-        this.box(103, 220, 126, 48);
-        this.box(100, 489, 126, 48);
-        this.box(320, 415, 210, 220);
-        this.box(350, 122, 180, 48);
-        this.box(352, 174, 60, 48);
-        this.box(547, 80, 168, 140);
-        this.box(846, 91, 68, 56);
-        this.box(846, 177, 68, 56);
-        this.box(784, 278, 190, 58);
-        this.box(812, 415, 190, 180);
-        this.box(666, 495, 70, 56);
-        this.box(615, 660, 160, 44);
-        this.box(615, 612, 160, 44);
-        this.box(338, 292, 112, 48);
+        this.box(46, 117, 210, 48);
+        this.box(118, 260, 128, 50);
+        this.box(118, 525, 128, 50);
+        this.box(332, 430, 230, 220);
+        this.box(382, 128, 205, 48);
+        this.box(382, 188, 70, 48);
+        this.box(620, 88, 170, 140);
+        this.box(850, 125, 70, 48);
+        this.box(850, 215, 70, 48);
+        this.box(790, 314, 195, 58);
+        this.box(790, 432, 205, 180);
+        this.box(690, 520, 74, 58);
+        this.box(610, 614, 170, 42);
+        this.box(610, 664, 170, 42);
+        this.box(333, 327, 130, 48);
 
-        this.highlightBox(350, 122, 180, 100, ["LDA", "ADC", "SBC", "AND", "ASL", "TYA", "CMP", "BIT"].includes(active));
-        this.highlightBox(846, 91, 68, 56, ["LDX", "INX", "DEX", "CPX"].includes(active));
-        this.highlightBox(846, 177, 68, 56, ["LDY", "DEY"].includes(active));
-        this.highlightBox(320, 415, 210, 220, ["STA", "LDA", "CMP", "DEC"].includes(active));
-        this.highlightBox(784, 278, 190, 58, Boolean(active && active !== "READY"));
-        this.highlightBox(615, 660, 160, 44, cpu && cpu.lastStep && cpu.lastStep.phase !== "Fetch");
-
-        const dotX = 145 + this.flash * 530;
-        this.gfx.fillStyle(AMBER_HEX, 0.95);
-        this.gfx.fillCircle(dotX, 518, 6);
-        this.gfx.fillCircle(260, 272 + this.flash * 235, 5);
+        this.highlightBox(382, 128, 205, 108, ["LDA", "ADC", "SBC", "AND", "ASL", "TYA", "CMP", "BIT"].includes(active));
+        this.highlightBox(850, 125, 70, 48, ["LDX", "INX", "DEX", "CPX"].includes(active));
+        this.highlightBox(850, 215, 70, 48, ["LDY", "DEY"].includes(active));
+        this.highlightBox(332, 430, 230, 220, ["STA", "LDA", "CMP", "DEC"].includes(active));
+        this.highlightBox(790, 314, 195, 58, Boolean(active && active !== "READY"));
+        this.highlightBox(610, 614, 170, 42, active !== "READY" && cpu && cpu.lastStep && cpu.lastStep.phase === "Fetch");
+        this.highlightBox(610, 664, 170, 42, cpu && cpu.lastStep && cpu.lastStep.phase !== "Fetch");
       }
     }
 

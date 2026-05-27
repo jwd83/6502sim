@@ -1,6 +1,6 @@
 ---
 title: Next Steps
-updated: 2026-05-26
+updated: 2026-05-27
 tags:
   - roadmap
   - port
@@ -12,10 +12,9 @@ tags:
 ## Near Term
 
 1. Decide the fidelity target: educational recreation, faithful MECC simulator clone, or broader Apple II emulator. The current code is strongest as an educational recreation.
-2. Add a small automated smoke test harness. Start with CPU-step tests for the seeded examples and a browser screenshot check for the Phaser scene.
-3. Align assembler output with CPU execution support. At minimum, either implement `LDX abs` (`0xAE`) or prevent the assembler from emitting unsupported opcodes.
-4. Add branch range validation in the assembler so out-of-range labels do not silently wrap.
-5. Read the disk volume from the disk image instead of hard-coding `DISK VOLUME 254`, or document the deliberate hard-code if the video reference should win.
+2. Broaden the new [Node smoke test harness](../tests/smoke.js). Add CPU-step assertions for the seeded examples and a browser screenshot check for the Phaser scene.
+3. Add branch range validation in the assembler so out-of-range labels do not silently wrap.
+4. Read the disk volume from the disk image instead of hard-coding `DISK VOLUME 254`, or document the deliberate hard-code if the video reference should win.
 
 ## Data-Driven Port Work
 
@@ -37,4 +36,3 @@ tags:
 2. When extraction becomes useful, split into focused modules: CPU, assembler, DOS catalog/file loading, Phaser scene, UI controls, and fixtures.
 3. Vendor Phaser or document the CDN dependency if offline reproducibility matters.
 4. Keep this wiki updated after each meaningful porting pass.
-

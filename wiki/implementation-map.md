@@ -1,6 +1,6 @@
 ---
 title: Implementation Map
-updated: 2026-05-26
+updated: 2026-05-27
 tags:
   - implementation
   - architecture
@@ -15,6 +15,7 @@ The current implementation is a single static HTML file: [index.html](../index.h
 ## Runtime Shape
 
 - HTML and CSS define the whole app shell: top toolbar, monitor panel, central Phaser canvas, program/source/catalog panel, and footer status line.
+- The shell uses a three-column desktop grid above the responsive breakpoint and a stacked single-column layout below it. The top-level grid is pinned to `minmax(0, 1fr)` so mobile viewports do not expand to the Phaser canvas's intrinsic width.
 - Phaser 3.80.1 is loaded from jsDelivr and used only for the central CPU diagram scene.
 - All app state lives in one `app` object plus a CPU object created by `createCpu()`.
 - The default boot path loads `EX15`, initializes the monitor transcript, renders a fallback catalog, installs event handlers, starts Phaser, then attempts to fetch and parse the disk image.
@@ -35,7 +36,7 @@ Implemented instruction behavior currently covers:
 | --- | --- |
 | Control | `BRK`, `JMP abs`, `JSR abs`, `RTS`, `NOP` |
 | Branch | `BMI`, `BNE`, `BEQ` |
-| Load/store | `LDA #`, `LDA zp`, `LDA abs`, `LDA abs,X`, `LDX #`, `LDX zp`, `LDY #`, `STA zp`, `STA abs`, `STA abs,X`, `STA (zp),Y` |
+| Load/store | `LDA #`, `LDA zp`, `LDA abs`, `LDA abs,X`, `LDX #`, `LDX zp`, `LDX abs`, `LDY #`, `STA zp`, `STA abs`, `STA abs,X`, `STA (zp),Y` |
 | Arithmetic/logic | `ADC #`, `SBC #`, `AND #`, `ASL A`, `BIT abs` |
 | Compare | `CMP #`, `CMP zp`, `CMP abs`, `CPX #` |
 | Increment/decrement | `INX`, `DEX`, `DEY`, `DEC zp` |
@@ -92,7 +93,7 @@ Known assembler gaps:
 - No object-file output format.
 - No branch range validation.
 - No robust expression parser.
-- Some emitted instructions do not yet have matching CPU execution support.
+- The supported assembler surface is still smaller than the wider 6502 syntax used by arbitrary source files.
 
 ## Disk Catalog
 
@@ -109,8 +110,11 @@ The supplied disk parses to 33 visible catalog entries using the current parser 
 - `Assemble Source` assembles the editor text into a custom program and loads it.
 - `Load DSK` lets the user pick a disk image and parse its catalog.
 - Spacebar steps when the focus is not in an input field.
+- The central CPU diagram uses centered text anchors for register and bus values, fixed component boxes for the major CPU areas, and state-driven highlights for active CPU regions.
+- The diagram redraws only when state changes or while the program is running, replacing the prior always-on animation loop with restrained bus pulses during active execution.
 
 ## Verification State
 
-Current verification is manual and artifact-based. The repository contains smoke screenshots of the current app, but no automated unit tests or browser tests.
+Current verification includes [tests/smoke.js](../tests/smoke.js), a dependency-free Node harness that loads the app script from [index.html](../index.html) with browser stubs. It checks that all seven seeded source listings still assemble to their embedded byte fixtures and that `LDX abs` (`0xAE`) both emits and executes correctly.
 
+Manual browser verification currently covers desktop, tablet, and mobile viewport screenshots, plus a `Step` interaction check that updates the monitor, status line, and CPU diagram. There is not yet an automated browser regression test or CI check.

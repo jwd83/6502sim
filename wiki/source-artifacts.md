@@ -1,6 +1,6 @@
 ---
 title: Source Artifacts
-updated: 2026-05-26
+updated: 2026-05-27
 tags:
   - sources
   - evidence
@@ -11,7 +11,8 @@ tags:
 
 ## Current Implementation
 
-- [index.html](../index.html) - 1965-line static app containing markup, styles, CPU/assembler/disk logic, Phaser rendering, and controls.
+- [index.html](../index.html) - 1972-line static app containing markup, styles, CPU/assembler/disk logic, Phaser rendering, and controls.
+- [tests/smoke.js](../tests/smoke.js) - Dependency-free Node smoke harness for seeded assembler fixtures and focused CPU execution paths.
 - [frames/app-smoke.png](../frames/app-smoke.png) and [frames/app-smoke-2.png](../frames/app-smoke-2.png) - current port screenshots at 1440x900.
 
 ## Original/Reference Artifacts
@@ -69,4 +70,3 @@ Using the app's current parser filters, the disk image exposes 33 visible catalo
 - Keep the disk image, video, and extracted frames immutable unless the user explicitly asks to regenerate or replace them.
 - If more frames are extracted from the video, add them to this page with the timestamp and what behavior they capture.
 - If disk file extraction is implemented, create a dedicated wiki page for DOS 3.3 file layout and track which catalog entries have been decoded.
-

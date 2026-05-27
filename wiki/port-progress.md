@@ -1,6 +1,6 @@
 ---
 title: Port Progress
-updated: 2026-05-26
+updated: 2026-05-27
 tags:
   - port
   - status
@@ -26,6 +26,7 @@ The current app has enough behavior to load selected example programs, step or r
 - Seven seeded example programs: EX4, EX6, EX9, EX15, EX24, EX26, and EX30.
 - Mini assembler for a useful subset of the source syntax used by the examples, including labels, `ORG`, `EQU`, comments, selected assembler directives, relative branches, and zero-page-vs-absolute emission.
 - DOS 3.3 catalog parsing for the supplied disk image, plus an embedded fallback catalog.
+- Node smoke test harness in [tests/smoke.js](../tests/smoke.js), covering seeded source round-trips and the assembler-emitted `LDX abs` execution path.
 - Current smoke screenshots in [frames/app-smoke.png](../frames/app-smoke.png) and [frames/app-smoke-2.png](../frames/app-smoke-2.png).
 
 ## Partial Or Prototype Areas
@@ -33,7 +34,7 @@ The current app has enough behavior to load selected example programs, step or r
 - This is not yet a full Apple II emulator. There is no 6502 bus model, Apple II memory map, video page rendering, keyboard model, speaker, disk controller, or ROM execution.
 - The disk image is parsed for catalog display only. Program bytes are currently hand-seeded in `PROGRAMS`; files are not loaded from DOS tracks/sectors.
 - CPU coverage is intentionally narrow. Unsupported opcodes halt execution with an "Unsupported opcode" note.
-- The mini assembler and CPU opcode table are not perfectly aligned. For example, the assembler can emit `LDX` absolute (`0xAE`), but the current opcode metadata and executor do not implement `0xAE`.
+- The mini assembler remains intentionally narrow and does not yet cover a full 6502 assembly syntax or object-file output path.
 - Decimal mode addition exists for `ADC`, but decimal-mode subtraction is not implemented for `SBC`.
 - The original prompt flow is represented through monitor text, but the app does not yet provide a full typed Apple II interaction model for loading programs, entering trace addresses, or setting registers.
 - Catalog rendering hard-codes `DISK VOLUME 254` and does not read/display the disk volume from the image.
@@ -48,7 +49,6 @@ The current app has enough behavior to load selected example programs, step or r
 
 ## Current Assessment
 
-The port is a strong visual and educational prototype. It captures the main teaching surface of the original simulator and provides real stepping behavior for a curated subset of examples. The biggest remaining shift is from "curated recreation" to "data-driven simulator": loading real disk files, broadening and testing the CPU/assembler surface, and deciding how faithful the Apple II environment should become.
+The port is a strong visual and educational prototype. It captures the main teaching surface of the original simulator and provides real stepping behavior for a curated subset of examples. The first automated smoke harness now protects the seeded assembler fixtures and one previously-misaligned opcode path. The biggest remaining shift is from "curated recreation" to "data-driven simulator": loading real disk files, broadening and testing the CPU/assembler surface, and deciding how faithful the Apple II environment should become.
 
 See [Implementation Map](implementation-map.md) for technical organization and [Next Steps](next-steps.md) for the likely path forward.
-
