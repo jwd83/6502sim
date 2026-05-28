@@ -1,6 +1,6 @@
 ---
 title: Next Steps
-updated: 2026-05-27
+updated: 2026-05-28
 tags:
   - roadmap
   - port
@@ -13,8 +13,8 @@ tags:
 
 1. Add an automated browser check that serves the repo, opens [index.html](../index.html), and verifies the footer reaches the mounted-disk status.
 2. Capture fresh screenshots of the new Apple2TS-backed main page and mark the older recreation screenshots as historical.
-3. Decide whether to vendor a known-good Apple2TS build for offline reproducibility.
-4. Document the expected local serving command and the `localhost` origin requirement in a README if this repo gets one.
+3. Document the expected local serving command in a README if this repo gets one.
+4. Revisit the vendored Apple2TS runtime only when a specific upstream bug fix or compatibility need appears.
 
 ## Emulator Integration
 
@@ -32,4 +32,5 @@ tags:
 
 1. Keep [index.html](../index.html) as a small static bootstrap page unless the integration grows enough to justify modules.
 2. Keep [tests/smoke.js](../tests/smoke.js) focused on guarding the main-page boot wiring.
-3. Keep this wiki updated after each meaningful porting pass.
+3. Keep [apple2ts/README.md](../apple2ts/README.md) updated whenever the vendored Apple2TS bundle is refreshed or patched.
+4. Keep this wiki updated after each meaningful porting pass.

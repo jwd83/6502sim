@@ -1,12 +1,24 @@
 ---
 title: Wiki Log
-updated: 2026-05-27
+updated: 2026-05-28
 tags:
   - log
   - wiki
 ---
 
 # Wiki Log
+
+## [2026-05-28] implementation | Vendored Apple2TS for same-origin deployment
+
+Added the static Apple2TS runtime under [apple2ts/](../apple2ts/) and changed [index.html](../index.html) to embed that local copy instead of `https://apple2ts.com/`. Patched the vendored bundle so the deployed `6502.jwd.me` origin is trusted for `loadDisk` messages, disabled the startup `/api/client/connect` probe, disabled the startup Web MIDI permission request, and removed the cloud-provider helper scripts from the vendored entrypoint. Removed the old generated recreation screenshots, `frames/app-smoke.png` and `frames/app-smoke-2.png`, as stale implementation artifacts.
+
+Evidence inspected:
+
+- [index.html](../index.html), now using `apple2ts/` as the iframe source and targeting the same-origin iframe for disk messages.
+- [apple2ts/README.md](../apple2ts/README.md), documenting the vendored runtime and local patches.
+- [apple2ts/assets/index-MSdiKkBp.js](../apple2ts/assets/index-MSdiKkBp.js), patched for same-origin trust and quiet startup behavior.
+- [tests/smoke.js](../tests/smoke.js), now checking local vendoring and the Apple2TS startup patches.
+- Browser verification at `http://localhost:8766/`, confirming mounted-disk status and no `requestMIDIAccess`, untrusted-origin, or `/api/client/connect` console messages.
 
 ## [2026-05-27] implementation | Promoted actual-disk emulator to index
 

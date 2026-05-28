@@ -1,6 +1,6 @@
 ---
 title: Source Artifacts
-updated: 2026-05-27
+updated: 2026-05-28
 tags:
   - sources
   - evidence
@@ -11,9 +11,9 @@ tags:
 
 ## Current Implementation
 
-- [index.html](../index.html) - 299-line static Apple2TS iframe/bootstrap page that mounts the provided disk image by `postMessage`.
-- [tests/smoke.js](../tests/smoke.js) - Dependency-free Node smoke harness for main-page emulator wiring and disk-image size.
-- [frames/app-smoke.png](../frames/app-smoke.png) and [frames/app-smoke-2.png](../frames/app-smoke-2.png) - historical screenshots of the removed recreation app at 1440x900.
+- [index.html](../index.html) - Static Apple2TS iframe/bootstrap page that mounts the provided disk image by `postMessage`.
+- [apple2ts/](../apple2ts/) - Vendored Apple2TS static runtime, local patch notes, and upstream license.
+- [tests/smoke.js](../tests/smoke.js) - Dependency-free Node smoke harness for main-page emulator wiring, vendored Apple2TS startup patches, and disk-image size.
 
 ## Original/Reference Artifacts
 
@@ -68,5 +68,6 @@ Using the app's current parser filters, the disk image exposes 33 visible catalo
 ## Notes For Future Ingest
 
 - Keep the disk image, video, and extracted frames immutable unless the user explicitly asks to regenerate or replace them.
+- The removed `frames/app-smoke.png` and `frames/app-smoke-2.png` files were generated screenshots of the retired recreation app, not original reference evidence.
 - If more frames are extracted from the video, add them to this page with the timestamp and what behavior they capture.
 - If disk file extraction is implemented, create a dedicated wiki page for DOS 3.3 file layout and track which catalog entries have been decoded.

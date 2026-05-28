@@ -204,7 +204,9 @@
   <script>
     "use strict";
 
-    const APPLE2TS_ORIGIN = "https://apple2ts.com";
+    const APPLE2TS_PATH = "apple2ts/";
+    const APPLE2TS_ORIGIN = window.location.origin;
+    const POST_TARGET_ORIGIN = APPLE2TS_ORIGIN === "null" ? "*" : APPLE2TS_ORIGIN;
     const DISK_IMAGE_NAME = "MECC-T691 Apple Assembly Language v1.0.dsk";
     const POST_ATTEMPTS = 3;
 
@@ -222,19 +224,6 @@
       theme: "dark"
     });
 
-    function redirectLoopbackToLocalhost() {
-      if (window.location.protocol !== "http:" && window.location.protocol !== "https:") {
-        return false;
-      }
-      if (window.location.hostname !== "127.0.0.1" && window.location.hostname !== "::1") {
-        return false;
-      }
-      const next = new URL(window.location.href);
-      next.hostname = "localhost";
-      window.location.replace(next.toString());
-      return true;
-    }
-
     function setStatus(text, isError) {
       statusLine.textContent = text;
       statusLine.classList.toggle("error", Boolean(isError));
@@ -242,7 +231,7 @@
 
     function loadEmulator() {
       setStatus("Loading Apple2TS.");
-      emulator.src = APPLE2TS_ORIGIN + "/?" + params.toString();
+      emulator.src = APPLE2TS_PATH + "?" + params.toString();
     }
 
     async function fetchDiskBytes() {
@@ -268,7 +257,7 @@
             type: "loadDisk",
             filename: DISK_IMAGE_NAME,
             data
-          }, APPLE2TS_ORIGIN);
+          }, POST_TARGET_ORIGIN);
           setStatus("Mounted " + DISK_IMAGE_NAME + " (" + data.length + " bytes).");
           if (attempts >= POST_ATTEMPTS) {
             window.clearInterval(mountTimer);
@@ -282,18 +271,16 @@
       }
     }
 
-    if (!redirectLoopbackToLocalhost()) {
-      emulator.addEventListener("load", () => {
-        window.setTimeout(mountDisk, 500);
-      });
-      reloadButton.addEventListener("click", mountDisk);
-      loadEmulator();
-      window.setTimeout(() => {
-        if (!/Mounted|failed|Reading/.test(statusLine.textContent)) {
-          mountDisk();
-        }
-      }, 4500);
-    }
+    emulator.addEventListener("load", () => {
+      window.setTimeout(mountDisk, 500);
+    });
+    reloadButton.addEventListener("click", mountDisk);
+    loadEmulator();
+    window.setTimeout(() => {
+      if (!/Mounted|failed|Reading/.test(statusLine.textContent)) {
+        mountDisk();
+      }
+    }, 4500);
   </script>
 </body>
 </html>
