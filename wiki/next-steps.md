@@ -11,28 +11,25 @@ tags:
 
 ## Near Term
 
-1. Decide the fidelity target: educational recreation, faithful MECC simulator clone, or broader Apple II emulator. The current code is strongest as an educational recreation.
-2. Broaden the new [Node smoke test harness](../tests/smoke.js). Add CPU-step assertions for the seeded examples and a browser screenshot check for the Phaser scene.
-3. Add branch range validation in the assembler so out-of-range labels do not silently wrap.
-4. Read the disk volume from the disk image instead of hard-coding `DISK VOLUME 254`, or document the deliberate hard-code if the video reference should win.
+1. Add an automated browser check that serves the repo, opens [index.html](../index.html), and verifies the footer reaches the mounted-disk status.
+2. Capture fresh screenshots of the new Apple2TS-backed main page and mark the older recreation screenshots as historical.
+3. Decide whether to vendor a known-good Apple2TS build for offline reproducibility.
+4. Document the expected local serving command and the `localhost` origin requirement in a README if this repo gets one.
 
-## Data-Driven Port Work
+## Emulator Integration
 
-1. Decode DOS 3.3 file contents from catalog entries and load `.OBJ0` files from the disk image.
-2. Compare hand-seeded program bytes against extracted disk bytes for EX4, EX6, EX9, EX15, EX24, EX26, and EX30.
-3. Add runnable entries for EX7, EX8, EX13, EX20, and EX33 after extracting or reconstructing their object bytes.
-4. Track source text files separately from object files so the source editor can show disk-derived sources where available.
+1. Keep the `loadDisk` message path small and explicit so it is easy to update if Apple2TS changes its embedding API.
+2. Consider exposing only the minimum controls needed around the iframe; Apple2TS already owns the emulator UI.
+3. Track any Apple2TS-specific compatibility issues against the supplied disk image.
 
-## Simulator Fidelity
+## Research And Preservation
 
-1. Implement the original prompt flow more fully: load-from-disk choice, program name entry, register setup, trace address selection, and Control-Y behavior.
-2. Expand CPU coverage using a tested 6502 opcode table or proven emulator core if the goal grows beyond the tutorial subset.
-3. Add Apple II memory/video behavior only as needed for the exercises. The current ROM-call shim approach is probably enough for many lessons.
-4. Decide whether ROM calls should remain summarized side effects or become real Apple II ROM execution.
+1. Preserve the disk image, reference video, and extracted frames as source evidence.
+2. If lesson behavior needs documentation, use the running Apple2TS disk as primary evidence and compare against the reference frames/video.
+3. Keep historical notes about the removed recreation in the wiki log rather than treating them as current implementation behavior.
 
 ## Maintainability
 
-1. Keep the single-file app until tests or feature growth make extraction worthwhile.
-2. When extraction becomes useful, split into focused modules: CPU, assembler, DOS catalog/file loading, Phaser scene, UI controls, and fixtures.
-3. Vendor Phaser or document the CDN dependency if offline reproducibility matters.
-4. Keep this wiki updated after each meaningful porting pass.
+1. Keep [index.html](../index.html) as a small static bootstrap page unless the integration grows enough to justify modules.
+2. Keep [tests/smoke.js](../tests/smoke.js) focused on guarding the main-page boot wiring.
+3. Keep this wiki updated after each meaningful porting pass.

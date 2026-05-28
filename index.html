@@ -3,21 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Apple ][ 6502 Simulator Recreation</title>
+  <meta name="theme-color" content="#050707">
+  <title>MECC Apple Assembly Language Disk</title>
   <style>
     :root {
       --bg: #050707;
-      --panel: #0b1110;
-      --panel-strong: #111817;
       --line: #24443a;
       --text: #cfeee2;
       --muted: #7da193;
       --green: #63ffbd;
-      --green-dim: #1c8b67;
-      --amber: #f4c75f;
-      --blue: #7aa7ff;
       --danger: #ff6d7a;
-      --shadow: rgba(0, 0, 0, 0.45);
       color-scheme: dark;
     }
 
@@ -38,27 +33,17 @@
       overflow: hidden;
     }
 
-    button,
-    select,
-    textarea,
-    input {
-      font: inherit;
-    }
-
-    button,
-    select,
-    .file-button {
+    button {
       min-height: 34px;
       border: 1px solid var(--line);
+      border-radius: 6px;
       background: #0c1513;
       color: var(--text);
-      border-radius: 6px;
       padding: 7px 10px;
-    }
-
-    button {
       cursor: pointer;
+      font: inherit;
       transition: border-color 120ms ease, background 120ms ease, transform 120ms ease;
+      white-space: nowrap;
     }
 
     button:hover {
@@ -70,29 +55,8 @@
       transform: translateY(1px);
     }
 
-    button.primary {
-      border-color: #3ecb94;
-      color: #02110d;
-      background: var(--green);
-    }
-
-    button.warn {
-      border-color: #8f6e26;
-      color: #171005;
-      background: var(--amber);
-    }
-
-    button.ghost {
-      background: transparent;
-    }
-
-    input[type="file"] {
-      display: none;
-    }
-
     #app {
       display: grid;
-      grid-template-columns: minmax(0, 1fr);
       grid-template-rows: auto 1fr auto;
       height: 100%;
       min-width: 320px;
@@ -100,13 +64,13 @@
 
     .topbar {
       display: grid;
-      grid-template-columns: minmax(240px, 1fr) auto;
+      grid-template-columns: minmax(220px, 1fr) auto;
       gap: 12px;
       align-items: center;
       padding: 10px 14px;
       border-bottom: 1px solid var(--line);
       background: linear-gradient(180deg, #0b1110 0%, #070a0a 100%);
-      box-shadow: 0 12px 24px var(--shadow);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.45);
       z-index: 2;
     }
 
@@ -121,7 +85,6 @@
       margin: 0;
       color: var(--green);
       font-size: clamp(17px, 2vw, 24px);
-      font-weight: 700;
       letter-spacing: 0;
       white-space: nowrap;
     }
@@ -141,225 +104,12 @@
       gap: 8px;
     }
 
-    .workspace {
-      display: grid;
-      grid-template-columns: minmax(285px, 0.8fr) minmax(625px, 1.75fr) minmax(330px, 0.85fr);
-      gap: 10px;
-      min-height: 0;
-      padding: 10px;
-    }
-
-    .panel,
-    .sim-panel {
-      min-height: 0;
-      min-width: 0;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--panel);
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02), 0 18px 38px var(--shadow);
-    }
-
-    .panel {
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .panel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      min-height: 38px;
-      padding: 9px 10px;
-      border-bottom: 1px solid var(--line);
-      background: var(--panel-strong);
-    }
-
-    .panel-header strong {
-      flex: 0 0 auto;
-      color: var(--green);
-      font-size: 13px;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-
-    .panel-header small {
-      color: var(--muted);
-      white-space: nowrap;
-    }
-
-    .monitor-screen,
-    .catalog-list,
-    .disassembly,
-    .memory-readout {
-      overflow: auto;
-      flex: 1;
-      margin: 0;
-      padding: 12px;
-      color: var(--green);
-      font-size: 13px;
-      line-height: 1.35;
-      white-space: pre-wrap;
-      text-shadow: 0 0 8px rgba(99, 255, 189, 0.22);
-    }
-
-    .monitor-screen {
-      background:
-        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 4px),
-        #020404;
-    }
-
-    .sim-panel {
-      display: grid;
-      grid-template-rows: minmax(0, 1fr) auto;
-      overflow: hidden;
-      background: #010303;
-    }
-
-    #game {
-      position: relative;
-      min-height: 0;
-      overflow: hidden;
-      background: #010303;
-    }
-
-    #game canvas {
-      display: block;
+    .emulator-frame {
       width: 100%;
       height: 100%;
-      image-rendering: pixelated;
-    }
-
-    .sim-strip {
-      display: grid;
-      grid-template-columns: minmax(200px, 1fr) auto;
-      gap: 10px;
-      align-items: center;
-      padding: 9px 10px;
-      border-top: 1px solid var(--line);
-      background: #07100d;
-    }
-
-    .status-line {
-      overflow: hidden;
-      color: var(--muted);
-      font-size: 13px;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .status-line b {
-      color: var(--green);
-      font-weight: 700;
-    }
-
-    .speed-control {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--muted);
-      font-size: 12px;
-      white-space: nowrap;
-    }
-
-    input[type="range"] {
-      width: 100px;
-      accent-color: var(--green);
-    }
-
-    .side-tabs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      justify-content: flex-end;
-    }
-
-    .tab-button {
-      min-height: 28px;
-      padding: 5px 8px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .tab-button.active {
-      border-color: var(--green);
-      color: var(--green);
-      background: #10221c;
-    }
-
-    .side-body {
-      display: grid;
-      grid-template-rows: auto 1fr auto;
       min-height: 0;
-      flex: 1;
-    }
-
-    .program-controls {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 8px;
-      padding: 10px;
-      border-bottom: 1px solid var(--line);
-      background: #08100e;
-    }
-
-    .program-controls select {
-      min-width: 0;
-    }
-
-    .editor-wrap {
-      display: none;
-      min-height: 0;
-    }
-
-    .editor-wrap.active {
-      display: grid;
-      grid-template-rows: minmax(150px, 1fr) minmax(145px, 0.75fr);
-    }
-
-    textarea {
-      width: 100%;
-      height: 100%;
-      resize: none;
       border: 0;
-      border-bottom: 1px solid var(--line);
-      outline: 0;
-      background: #030606;
-      color: var(--green);
-      padding: 12px;
-      font-size: 13px;
-      line-height: 1.35;
-      tab-size: 2;
-    }
-
-    .readout-title {
-      padding: 8px 12px 0;
-      color: var(--amber);
-      font-size: 12px;
-      text-transform: uppercase;
-    }
-
-    .catalog-wrap,
-    .disasm-wrap {
-      display: none;
-      min-height: 0;
-      flex: 1;
-    }
-
-    .catalog-wrap.active,
-    .disasm-wrap.active {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .side-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding: 10px;
-      border-top: 1px solid var(--line);
-      background: var(--panel-strong);
+      background: #181818;
     }
 
     .footer {
@@ -379,16 +129,16 @@
       white-space: nowrap;
     }
 
-    .phaser-error {
-      display: grid;
-      place-items: center;
-      height: 100%;
-      padding: 20px;
-      color: var(--danger);
-      text-align: center;
+    .footer b {
+      color: var(--green);
+      font-weight: 700;
     }
 
-    @media (max-width: 1220px) {
+    .footer .error {
+      color: var(--danger);
+    }
+
+    @media (max-width: 720px) {
       body {
         overflow: auto;
       }
@@ -396,25 +146,10 @@
       #app {
         min-height: 100%;
         height: auto;
+        grid-template-rows: auto minmax(620px, 78vh) auto;
       }
 
-      .workspace {
-        grid-template-columns: 1fr;
-        grid-template-rows: minmax(260px, 34vh) minmax(520px, 66vh) minmax(560px, 70vh);
-      }
-
-      .panel {
-        min-height: 260px;
-      }
-
-      .sim-panel {
-        min-height: 520px;
-      }
-    }
-
-    @media (max-width: 720px) {
       .topbar,
-      .sim-strip,
       .footer {
         grid-template-columns: 1fr;
       }
@@ -426,7 +161,7 @@
 
       .toolbar {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: minmax(0, 1fr);
         justify-content: flex-start;
         width: 100%;
       }
@@ -437,19 +172,6 @@
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-
-      .workspace {
-        padding: 8px;
-        grid-template-rows: minmax(240px, 32vh) minmax(330px, 46vh) minmax(560px, 72vh);
-      }
-
-      .sim-panel {
-        min-height: 330px;
-      }
-
-      .program-controls {
-        grid-template-columns: 1fr;
-      }
     }
   </style>
 </head>
@@ -457,1605 +179,121 @@
   <div id="app">
     <header class="topbar">
       <div class="brand">
-        <h1>Apple ][ 6502 Simulator</h1>
-        <span>MECC Apple Assembly Language v1.0 recreation</span>
+        <h1>Actual MECC Disk</h1>
+        <span>Apple2TS running the repository disk image</span>
       </div>
       <div class="toolbar">
-        <button id="resetButton" class="ghost" type="button">Reset</button>
-        <button id="stepButton" class="primary" type="button">Step</button>
-        <button id="runButton" class="warn" type="button">Run</button>
-        <button id="traceButton" class="ghost" type="button">Trace Prompt</button>
+        <button id="reloadDisk" type="button">Reload Disk</button>
       </div>
     </header>
 
-    <main class="workspace">
-      <aside class="panel">
-        <div class="panel-header">
-          <strong>Monitor</strong>
-          <small id="monitorMode">READY</small>
-        </div>
-        <pre id="monitorLog" class="monitor-screen"></pre>
-      </aside>
-
-      <section class="sim-panel">
-        <div id="game" aria-label="Phaser 6502 simulator display"></div>
-        <div class="sim-strip">
-          <div id="statusLine" class="status-line">Loaded <b>EX15.OBJ0</b> at $0300</div>
-          <label class="speed-control">
-            Speed
-            <input id="speedRange" type="range" min="80" max="900" value="420">
-          </label>
-        </div>
-      </section>
-
-      <aside class="panel">
-        <div class="panel-header">
-          <strong>Program Disk</strong>
-          <div class="side-tabs" role="tablist" aria-label="Right panel tabs">
-            <button class="tab-button active" data-tab="source" type="button">Source</button>
-            <button class="tab-button" data-tab="disasm" type="button">Trace</button>
-            <button class="tab-button" data-tab="catalog" type="button">Catalog</button>
-          </div>
-        </div>
-
-        <div class="side-body">
-          <div class="program-controls">
-            <select id="exampleSelect" aria-label="Example program"></select>
-            <button id="loadButton" type="button">Load</button>
-          </div>
-
-          <div id="sourceTab" class="editor-wrap active">
-            <textarea id="sourceEditor" spellcheck="false" aria-label="Assembly source editor"></textarea>
-            <div>
-              <div class="readout-title">Memory and registers</div>
-              <pre id="memoryReadout" class="memory-readout"></pre>
-            </div>
-          </div>
-
-          <div id="disasmTab" class="disasm-wrap">
-            <pre id="disassembly" class="disassembly"></pre>
-          </div>
-
-          <div id="catalogTab" class="catalog-wrap">
-            <pre id="catalogList" class="catalog-list"></pre>
-          </div>
-
-          <div class="side-actions">
-            <button id="assembleButton" type="button">Assemble Source</button>
-            <label class="file-button" for="diskFile">Load DSK</label>
-            <input id="diskFile" type="file" accept=".dsk,.do,.po,application/octet-stream">
-          </div>
-        </div>
-      </aside>
-    </main>
+    <iframe
+      id="emulator"
+      class="emulator-frame"
+      title="Apple2TS emulator running the MECC Apple Assembly Language disk"
+      allow="fullscreen"
+      referrerpolicy="no-referrer"
+    ></iframe>
 
     <footer class="footer">
-      <span id="diskStatus">Disk catalog fallback loaded.</span>
-      <span>Controls: Step advances one instruction. Run loops until RTS/BRK.</span>
+      <span id="diskStatus">Preparing disk image.</span>
+      <span><b>Disk:</b> MECC-T691 Apple Assembly Language v1.0.dsk</span>
     </footer>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
   <script>
     "use strict";
 
+    const APPLE2TS_ORIGIN = "https://apple2ts.com";
     const DISK_IMAGE_NAME = "MECC-T691 Apple Assembly Language v1.0.dsk";
-    const GREEN_HEX = 0x63ffbd;
-    const GREEN_DIM_HEX = 0x1a8c65;
-    const AMBER_HEX = 0xf4c75f;
-    const BLUE_HEX = 0x7aa7ff;
+    const POST_ATTEMPTS = 3;
 
-    const FLAG = {
-      C: 0x01,
-      Z: 0x02,
-      I: 0x04,
-      D: 0x08,
-      B: 0x10,
-      U: 0x20,
-      V: 0x40,
-      N: 0x80
-    };
+    const emulator = document.getElementById("emulator");
+    const statusLine = document.getElementById("diskStatus");
+    const reloadButton = document.getElementById("reloadDisk");
+    let mountTimer = null;
 
-    const DEFAULT_CATALOG = [
-      ["A", 20, "HELLO"],
-      ["B", 28, "THE 6502 SIMULATOR"],
-      ["B", 9, "STEP AND TRACE"],
-      ["A", 4, "MINI-ASSM.INFO"],
-      ["B", 3, "MINI-ASSEMBLER"],
-      ["A", 4, "EDASM.INFO"],
-      ["A", 3, "EDASM"],
-      ["B", 8, "EDASM.OBJ"],
-      ["B", 36, "ASSM"],
-      ["B", 16, "EDITOR"],
-      ["B", 2, "ASMIDSTAMP"],
-      ["A", 5, "BINARY FILE INFO"],
-      ["B", 4, "BINFO"],
-      ["B", 13, "CONVERT"],
-      ["A", 5, "EXAMPLES"],
-      ["T", 3, "EX4"],
-      ["B", 2, "EX4.OBJ0"],
-      ["T", 3, "EX6"],
-      ["B", 2, "EX6.OBJ0"],
-      ["B", 2, "EX7.OBJ0"],
-      ["B", 2, "EX8.OBJ0"],
-      ["T", 3, "EX9"],
-      ["B", 2, "EX9.OBJ0"],
-      ["T", 5, "EX13"],
-      ["B", 2, "EX13.OBJ0"],
-      ["T", 3, "EX15"],
-      ["B", 2, "EX15.OBJ0"],
-      ["B", 2, "EX20.OBJ0"],
-      ["B", 2, "EX24.OBJ0"],
-      ["B", 2, "EX26.OBJ0"],
-      ["B", 2, "EX30.OBJ0"],
-      ["T", 8, "EX33"],
-      ["B", 2, "EX33.OBJ0"]
-    ].map((row) => ({ type: row[0], sectors: row[1], name: row[2], locked: row[2] !== "ASMIDSTAMP" }));
+    const params = new URLSearchParams({
+      appmode: "embed",
+      machine: "apple2p",
+      color: "green",
+      speed: "normal",
+      sound: "off",
+      theme: "dark"
+    });
 
-    const PROGRAMS = [
-      {
-        id: "EX4",
-        file: "EX4.OBJ0",
-        title: "EX4 - store immediate value",
-        address: 0x0300,
-        bytes: [0xA9, 0x11, 0x8D, 0x06, 0x03, 0x60],
-        source: [
-          "LST ON",
-          "SBTL .EXAMPLE/EXERCISE #4.",
-          "*THIS IS EXAMPLE PROGRAM #4.",
-          "ORG $300",
-          "RESULT EQU $306",
-          "BEGIN LDA #$11",
-          "      STA RESULT",
-          "      RTS"
-        ].join("\n")
-      },
-      {
-        id: "EX6",
-        file: "EX6.OBJ0",
-        title: "EX6 - multiply by 2 with ASL",
-        address: 0x0300,
-        bytes: [0xA9, 0x12, 0x0A, 0x8D, 0x07, 0x03, 0x60],
-        source: [
-          "SBTL .EXAMPLE/EXERCISE #6.",
-          "*THIS PROGRAM WILL MULTIPLY A VALUE BY 2.",
-          "ORG $300",
-          "RESULT EQU $307",
-          "BEGIN LDA #$12",
-          "      ASL A",
-          "      STA RESULT",
-          "      RTS"
-        ].join("\n")
-      },
-      {
-        id: "EX9",
-        file: "EX9.OBJ0",
-        title: "EX9 - plot one graphics point",
-        address: 0x0300,
-        bytes: [0x20, 0x2F, 0xFB, 0xEA, 0x20, 0x58, 0xFC, 0xA9, 0xFF, 0x85, 0x30, 0xA0, 0x0A, 0xA9, 0x0F, 0x20, 0x00, 0xF8, 0x60],
-        source: [
-          "SBTL .EXAMPLE/EXERCISE #9.",
-          "*THIS PROGRAM WILL PLOT ONE POINT ON THE SCREEN.",
-          "ORG $300",
-          "COLOR EQU $30",
-          "BEGIN JSR $FB2F",
-          "      NOP",
-          "      JSR $FC58",
-          "      LDA #$FF",
-          "      STA COLOR",
-          "      LDY #$0A",
-          "      LDA #$0F",
-          "      JSR $F800",
-          "      RTS"
-        ].join("\n")
-      },
-      {
-        id: "EX15",
-        file: "EX15.OBJ0",
-        title: "EX15 - write A across text page",
-        address: 0x0300,
-        bytes: [0x20, 0x58, 0xFC, 0xA2, 0x00, 0xA9, 0xC1, 0x9D, 0x00, 0x04, 0xE8, 0xE0, 0x27, 0xD0, 0xF8, 0x60],
-        source: [
-          "SBTL .EXAMPLE/EXERCISE #15.",
-          "*DISPLAY AN ALPHABETIC CHARACTER SEVERAL TIMES ACROSS THE TOP OF THE PAGE.",
-          "ORG $300",
-          "BEGIN JSR $FC58",
-          "      LDX #$00",
-          "      LDA #$C1",
-          "LOOP  STA $0400,X",
-          "      INX",
-          "      CPX #$27",
-          "      BNE LOOP",
-          "      RTS"
-        ].join("\n")
-      },
-      {
-        id: "EX24",
-        file: "EX24.OBJ0",
-        title: "EX24 - add two bytes",
-        address: 0x5300,
-        bytes: [0x18, 0xA9, 0x21, 0x69, 0x1A, 0x20, 0xDA, 0xFD, 0x60],
-        source: [
-          "ORG $5300",
-          "BEGIN CLC",
-          "      LDA #$21",
-          "      ADC #$1A",
-          "      JSR $FDDA",
-          "      RTS"
-        ].join("\n")
-      },
-      {
-        id: "EX26",
-        file: "EX26.OBJ0",
-        title: "EX26 - subtract two bytes",
-        address: 0x5300,
-        bytes: [0x38, 0xA9, 0x4D, 0xE9, 0x31, 0x20, 0xDA, 0xFD, 0x60],
-        source: [
-          "ORG $5300",
-          "BEGIN SEC",
-          "      LDA #$4D",
-          "      SBC #$31",
-          "      JSR $FDDA",
-          "      RTS"
-        ].join("\n")
-      },
-      {
-        id: "EX30",
-        file: "EX30.OBJ0",
-        title: "EX30 - decimal mode addition",
-        address: 0x5300,
-        bytes: [0xF8, 0x18, 0xA9, 0x18, 0x69, 0x34, 0xD8, 0x20, 0xDA, 0xFD, 0x60],
-        source: [
-          "ORG $5300",
-          "BEGIN SED",
-          "      CLC",
-          "      LDA #$18",
-          "      ADC #$34",
-          "      CLD",
-          "      JSR $FDDA",
-          "      RTS"
-        ].join("\n")
+    function redirectLoopbackToLocalhost() {
+      if (window.location.protocol !== "http:" && window.location.protocol !== "https:") {
+        return false;
       }
-    ];
-
-    const OPCODES = {
-      0x00: ["BRK", "imp", 1],
-      0x0A: ["ASL", "A", 1],
-      0x18: ["CLC", "imp", 1],
-      0x20: ["JSR", "abs", 3],
-      0x29: ["AND", "imm", 2],
-      0x2C: ["BIT", "abs", 3],
-      0x30: ["BMI", "rel", 2],
-      0x38: ["SEC", "imp", 1],
-      0x4C: ["JMP", "abs", 3],
-      0x60: ["RTS", "imp", 1],
-      0x69: ["ADC", "imm", 2],
-      0x85: ["STA", "zp", 2],
-      0x88: ["DEY", "imp", 1],
-      0x8D: ["STA", "abs", 3],
-      0x91: ["STA", "(zp),Y", 2],
-      0x98: ["TYA", "imp", 1],
-      0x9D: ["STA", "abs,X", 3],
-      0xA0: ["LDY", "imm", 2],
-      0xA2: ["LDX", "imm", 2],
-      0xA5: ["LDA", "zp", 2],
-      0xA6: ["LDX", "zp", 2],
-      0xA9: ["LDA", "imm", 2],
-      0xAD: ["LDA", "abs", 3],
-      0xAE: ["LDX", "abs", 3],
-      0xBD: ["LDA", "abs,X", 3],
-      0xC5: ["CMP", "zp", 2],
-      0xC6: ["DEC", "zp", 2],
-      0xC9: ["CMP", "imm", 2],
-      0xCA: ["DEX", "imp", 1],
-      0xCD: ["CMP", "abs", 3],
-      0xD0: ["BNE", "rel", 2],
-      0xD8: ["CLD", "imp", 1],
-      0xE0: ["CPX", "imm", 2],
-      0xE8: ["INX", "imp", 1],
-      0xE9: ["SBC", "imm", 2],
-      0xEA: ["NOP", "imp", 1],
-      0xF0: ["BEQ", "rel", 2],
-      0xF8: ["SED", "imp", 1]
-    };
-
-    const app = {
-      cpu: null,
-      scene: null,
-      currentProgram: PROGRAMS[3],
-      running: false,
-      runTimer: null,
-      parsedCatalog: DEFAULT_CATALOG,
-      tracePromptVisible: false
-    };
-
-    function hex(value, width) {
-      return (value >>> 0).toString(16).toUpperCase().padStart(width, "0");
+      if (window.location.hostname !== "127.0.0.1" && window.location.hostname !== "::1") {
+        return false;
+      }
+      const next = new URL(window.location.href);
+      next.hostname = "localhost";
+      window.location.replace(next.toString());
+      return true;
     }
 
-    function signedByte(value) {
-      return value < 0x80 ? value : value - 0x100;
+    function setStatus(text, isError) {
+      statusLine.textContent = text;
+      statusLine.classList.toggle("error", Boolean(isError));
     }
 
-    function appleName(bytes) {
-      let out = "";
-      for (const value of bytes) {
-        const c = value & 0x7F;
-        out += c >= 32 && c < 127 ? String.fromCharCode(c) : " ";
-      }
-      return out.trimEnd();
+    function loadEmulator() {
+      setStatus("Loading Apple2TS.");
+      emulator.src = APPLE2TS_ORIGIN + "/?" + params.toString();
     }
 
-    function parseDos33Catalog(buffer) {
-      const data = new Uint8Array(buffer);
-      if (data.length < 143360) {
-        throw new Error("Disk image is too small for a 35-track DOS 3.3 image.");
+    async function fetchDiskBytes() {
+      const response = await fetch(encodeURI(DISK_IMAGE_NAME), { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error("HTTP " + response.status);
       }
-      const typeMap = { 0: "T", 1: "I", 2: "A", 4: "B", 8: "S", 16: "R" };
-      const sector = (track, diskSector) => {
-        if (track < 0 || track >= 35 || diskSector < 0 || diskSector >= 16) {
-          throw new Error("Invalid catalog sector reference.");
-        }
-        const offset = (track * 16 + diskSector) * 256;
-        return data.subarray(offset, offset + 256);
-      };
-      const entries = [];
-      let track = 17;
-      let diskSector = 15;
-      const seen = new Set();
-      while (track && !seen.has(track + ":" + diskSector)) {
-        seen.add(track + ":" + diskSector);
-        const block = sector(track, diskSector);
-        for (let slot = 0; slot < 7; slot += 1) {
-          const offset = 0x0B + slot * 35;
-          const firstTrack = block[offset];
-          if (firstTrack === 0 || firstTrack === 0xFF) {
-            continue;
-          }
-          const fileType = block[offset + 2];
-          const sectors = block[offset + 33] + block[offset + 34] * 256;
-          const name = appleName(block.subarray(offset + 3, offset + 33));
-          if (sectors > 0 && name) {
-            entries.push({
-              type: typeMap[fileType & 0x7F] || "?",
-              sectors,
-              name,
-              locked: Boolean(fileType & 0x80)
-            });
-          }
-        }
-        track = block[1];
-        diskSector = block[2];
-      }
-      return entries;
+      return new Uint8Array(await response.arrayBuffer());
     }
 
-    function createCpu() {
-      const memory = new Uint8Array(65536);
-      memory.fill(0x00);
-      for (let address = 0x0100; address <= 0x01FF; address += 1) {
-        memory[address] = 0xFF;
-      }
-      return {
-        memory,
-        a: 0,
-        x: 0,
-        y: 0,
-        p: FLAG.U,
-        sp: 0xFF,
-        pc: 0x0300,
-        start: 0x0300,
-        end: 0x0300,
-        halted: false,
-        cycles: 0,
-        lastStep: null,
-        output: "",
-        graphicsLog: []
-      };
-    }
-
-    function getFlag(cpu, flag) {
-      return (cpu.p & flag) ? 1 : 0;
-    }
-
-    function setFlag(cpu, flag, enabled) {
-      if (enabled) {
-        cpu.p |= flag;
-      } else {
-        cpu.p &= (~flag) & 0xFF;
-      }
-      cpu.p |= FLAG.U;
-    }
-
-    function setZN(cpu, value) {
-      setFlag(cpu, FLAG.Z, (value & 0xFF) === 0);
-      setFlag(cpu, FLAG.N, Boolean(value & 0x80));
-    }
-
-    function compare(cpu, registerValue, operand) {
-      const result = (registerValue - operand) & 0xFF;
-      setFlag(cpu, FLAG.C, registerValue >= operand);
-      setZN(cpu, result);
-    }
-
-    function read16(cpu, address) {
-      return cpu.memory[address & 0xFFFF] | (cpu.memory[(address + 1) & 0xFFFF] << 8);
-    }
-
-    function write(cpu, address, value) {
-      cpu.memory[address & 0xFFFF] = value & 0xFF;
-    }
-
-    function push(cpu, value) {
-      write(cpu, 0x0100 + cpu.sp, value);
-      cpu.sp = (cpu.sp - 1) & 0xFF;
-    }
-
-    function pop(cpu) {
-      cpu.sp = (cpu.sp + 1) & 0xFF;
-      return cpu.memory[0x0100 + cpu.sp];
-    }
-
-    function resetCpuWithProgram(program) {
-      const cpu = createCpu();
-      cpu.pc = program.address;
-      cpu.start = program.address;
-      cpu.end = program.address + program.bytes.length;
-      program.bytes.forEach((byte, index) => {
-        cpu.memory[(program.address + index) & 0xFFFF] = byte;
-      });
-      cpu.lastStep = {
-        pc: cpu.pc,
-        opcode: cpu.memory[cpu.pc],
-        bytes: [cpu.memory[cpu.pc]],
-        mnemonic: "READY",
-        operandText: "",
-        phase: "Fetch",
-        target: cpu.pc,
-        data: cpu.memory[cpu.pc]
-      };
-      app.cpu = cpu;
-      app.currentProgram = program;
-      return cpu;
-    }
-
-    function adc(cpu, value) {
-      const carry = getFlag(cpu, FLAG.C);
-      if (getFlag(cpu, FLAG.D)) {
-        let low = (cpu.a & 0x0F) + (value & 0x0F) + carry;
-        let high = (cpu.a >> 4) + (value >> 4);
-        if (low > 9) {
-          low += 6;
-          high += 1;
-        }
-        if (high > 9) {
-          high += 6;
-        }
-        const result = ((high << 4) | (low & 0x0F)) & 0xFF;
-        setFlag(cpu, FLAG.C, high > 15);
-        cpu.a = result;
-        setZN(cpu, cpu.a);
-        return;
-      }
-      const sum = cpu.a + value + carry;
-      const result = sum & 0xFF;
-      setFlag(cpu, FLAG.C, sum > 0xFF);
-      setFlag(cpu, FLAG.V, (~(cpu.a ^ value) & (cpu.a ^ result) & 0x80) !== 0);
-      cpu.a = result;
-      setZN(cpu, cpu.a);
-    }
-
-    function sbc(cpu, value) {
-      const carry = getFlag(cpu, FLAG.C);
-      const inverted = value ^ 0xFF;
-      const sum = cpu.a + inverted + carry;
-      const result = sum & 0xFF;
-      setFlag(cpu, FLAG.C, sum > 0xFF);
-      setFlag(cpu, FLAG.V, ((cpu.a ^ result) & (inverted ^ result) & 0x80) !== 0);
-      cpu.a = result;
-      setZN(cpu, cpu.a);
-    }
-
-    function handleRomCall(cpu, target) {
-      const nameMap = {
-        0xF800: "PLOT",
-        0xF819: "HLIN",
-        0xF828: "VLIN",
-        0xFB2F: "INIT GRAPHICS",
-        0xFB40: "GRAPHICS MODE",
-        0xFC58: "CLEAR SCREEN",
-        0xFD1B: "RANDOM",
-        0xFD8E: "CARRIAGE RETURN",
-        0xFDDA: "PRINT HEX",
-        0xFDED: "COUT",
-        0xFF3A: "WAIT"
-      };
-      if (target === 0xFC58 || target === 0xFB2F || target === 0xFB40) {
-        if (target === 0xFC58) {
-          cpu.output = "";
-        }
-        cpu.graphicsLog.push(nameMap[target]);
-      } else if (target === 0xF800) {
-        cpu.graphicsLog.push("PLOT (" + cpu.y + "," + cpu.a + ")");
-      } else if (target === 0xF819) {
-        cpu.graphicsLog.push("HLIN row " + cpu.a + " col " + cpu.y + ".." + cpu.memory[0x2C]);
-      } else if (target === 0xF828) {
-        cpu.graphicsLog.push("VLIN col " + cpu.y + " row " + cpu.a + ".." + cpu.memory[0x2D]);
-      } else if (target === 0xFD1B) {
-        cpu.memory[0x4F] = Math.floor(Math.random() * 256);
-      } else if (target === 0xFD8E) {
-        cpu.output += "\n";
-      } else if (target === 0xFDDA) {
-        cpu.output += "$" + hex(cpu.a, 2) + " ";
-      } else if (target === 0xFDED) {
-        cpu.output += String.fromCharCode(cpu.a & 0x7F);
-      }
-      return nameMap[target] || "ROM $" + hex(target, 4);
-    }
-
-    function formatOperand(cpu, opcode, pc) {
-      const meta = OPCODES[opcode] || ["???", "imp", 1];
-      const mode = meta[1];
-      if (mode === "imm") {
-        return "#$" + hex(cpu.memory[(pc + 1) & 0xFFFF], 2);
-      }
-      if (mode === "zp") {
-        return "$" + hex(cpu.memory[(pc + 1) & 0xFFFF], 2);
-      }
-      if (mode === "abs") {
-        return "$" + hex(read16(cpu, pc + 1), 4);
-      }
-      if (mode === "abs,X") {
-        return "$" + hex(read16(cpu, pc + 1), 4) + ",X";
-      }
-      if (mode === "(zp),Y") {
-        return "($" + hex(cpu.memory[(pc + 1) & 0xFFFF], 2) + "),Y";
-      }
-      if (mode === "rel") {
-        const target = (pc + 2 + signedByte(cpu.memory[(pc + 1) & 0xFFFF])) & 0xFFFF;
-        return "$" + hex(target, 4);
-      }
-      if (mode === "A") {
-        return "A";
-      }
-      return "";
-    }
-
-    function stepCpu(cpu) {
-      if (!cpu || cpu.halted) {
-        return;
-      }
-      const pc = cpu.pc;
-      const opcode = cpu.memory[pc];
-      const meta = OPCODES[opcode] || ["???", "imp", 1];
-      const length = meta[2];
-      const bytes = Array.from({ length }, (_, index) => cpu.memory[(pc + index) & 0xFFFF]);
-      let nextPc = (pc + length) & 0xFFFF;
-      let target = null;
-      let data = null;
-      let note = "";
-
-      switch (opcode) {
-        case 0x00:
-          cpu.halted = true;
-          note = "BRK";
-          break;
-        case 0x0A:
-          setFlag(cpu, FLAG.C, Boolean(cpu.a & 0x80));
-          cpu.a = (cpu.a << 1) & 0xFF;
-          setZN(cpu, cpu.a);
-          data = cpu.a;
-          break;
-        case 0x18:
-          setFlag(cpu, FLAG.C, false);
-          break;
-        case 0x20: {
-          target = read16(cpu, pc + 1);
-          if (target >= 0xF000) {
-            note = handleRomCall(cpu, target);
-          } else {
-            const returnAddress = (nextPc - 1) & 0xFFFF;
-            push(cpu, returnAddress >> 8);
-            push(cpu, returnAddress & 0xFF);
-            nextPc = target;
-          }
-          break;
-        }
-        case 0x29:
-          cpu.a &= cpu.memory[(pc + 1) & 0xFFFF];
-          setZN(cpu, cpu.a);
-          data = cpu.a;
-          break;
-        case 0x2C:
-          data = cpu.memory[read16(cpu, pc + 1)];
-          setFlag(cpu, FLAG.Z, (cpu.a & data) === 0);
-          setFlag(cpu, FLAG.V, Boolean(data & 0x40));
-          setFlag(cpu, FLAG.N, Boolean(data & 0x80));
-          break;
-        case 0x30:
-          target = (pc + 2 + signedByte(cpu.memory[(pc + 1) & 0xFFFF])) & 0xFFFF;
-          if (getFlag(cpu, FLAG.N)) {
-            nextPc = target;
-          }
-          break;
-        case 0x38:
-          setFlag(cpu, FLAG.C, true);
-          break;
-        case 0x4C:
-          target = read16(cpu, pc + 1);
-          nextPc = target;
-          break;
-        case 0x60:
-          if (cpu.sp === 0xFF) {
-            cpu.halted = true;
-            note = "RTS";
-          } else {
-            const lo = pop(cpu);
-            const hi = pop(cpu);
-            nextPc = ((hi << 8) | lo) + 1;
-          }
-          break;
-        case 0x69:
-          adc(cpu, cpu.memory[(pc + 1) & 0xFFFF]);
-          data = cpu.a;
-          break;
-        case 0x85:
-          target = cpu.memory[(pc + 1) & 0xFFFF];
-          write(cpu, target, cpu.a);
-          data = cpu.a;
-          break;
-        case 0x88:
-          cpu.y = (cpu.y - 1) & 0xFF;
-          setZN(cpu, cpu.y);
-          data = cpu.y;
-          break;
-        case 0x8D:
-          target = read16(cpu, pc + 1);
-          write(cpu, target, cpu.a);
-          data = cpu.a;
-          break;
-        case 0x91: {
-          const zp = cpu.memory[(pc + 1) & 0xFFFF];
-          target = (cpu.memory[zp] | (cpu.memory[(zp + 1) & 0xFF] << 8)) + cpu.y;
-          write(cpu, target, cpu.a);
-          data = cpu.a;
-          break;
-        }
-        case 0x98:
-          cpu.a = cpu.y;
-          setZN(cpu, cpu.a);
-          data = cpu.a;
-          break;
-        case 0x9D:
-          target = (read16(cpu, pc + 1) + cpu.x) & 0xFFFF;
-          write(cpu, target, cpu.a);
-          data = cpu.a;
-          break;
-        case 0xA0:
-          cpu.y = cpu.memory[(pc + 1) & 0xFFFF];
-          setZN(cpu, cpu.y);
-          data = cpu.y;
-          break;
-        case 0xA2:
-          cpu.x = cpu.memory[(pc + 1) & 0xFFFF];
-          setZN(cpu, cpu.x);
-          data = cpu.x;
-          break;
-        case 0xA5:
-          target = cpu.memory[(pc + 1) & 0xFFFF];
-          cpu.a = cpu.memory[target];
-          setZN(cpu, cpu.a);
-          data = cpu.a;
-          break;
-        case 0xA6:
-          target = cpu.memory[(pc + 1) & 0xFFFF];
-          cpu.x = cpu.memory[target];
-          setZN(cpu, cpu.x);
-          data = cpu.x;
-          break;
-        case 0xAE:
-          target = read16(cpu, pc + 1);
-          cpu.x = cpu.memory[target];
-          setZN(cpu, cpu.x);
-          data = cpu.x;
-          break;
-        case 0xA9:
-          cpu.a = cpu.memory[(pc + 1) & 0xFFFF];
-          setZN(cpu, cpu.a);
-          data = cpu.a;
-          break;
-        case 0xAD:
-          target = read16(cpu, pc + 1);
-          cpu.a = cpu.memory[target];
-          setZN(cpu, cpu.a);
-          data = cpu.a;
-          break;
-        case 0xBD:
-          target = (read16(cpu, pc + 1) + cpu.x) & 0xFFFF;
-          cpu.a = cpu.memory[target];
-          setZN(cpu, cpu.a);
-          data = cpu.a;
-          break;
-        case 0xC5:
-          target = cpu.memory[(pc + 1) & 0xFFFF];
-          compare(cpu, cpu.a, cpu.memory[target]);
-          data = cpu.memory[target];
-          break;
-        case 0xC6:
-          target = cpu.memory[(pc + 1) & 0xFFFF];
-          data = (cpu.memory[target] - 1) & 0xFF;
-          write(cpu, target, data);
-          setZN(cpu, data);
-          break;
-        case 0xC9:
-          compare(cpu, cpu.a, cpu.memory[(pc + 1) & 0xFFFF]);
-          data = cpu.memory[(pc + 1) & 0xFFFF];
-          break;
-        case 0xCA:
-          cpu.x = (cpu.x - 1) & 0xFF;
-          setZN(cpu, cpu.x);
-          data = cpu.x;
-          break;
-        case 0xCD:
-          target = read16(cpu, pc + 1);
-          compare(cpu, cpu.a, cpu.memory[target]);
-          data = cpu.memory[target];
-          break;
-        case 0xD0:
-          target = (pc + 2 + signedByte(cpu.memory[(pc + 1) & 0xFFFF])) & 0xFFFF;
-          if (!getFlag(cpu, FLAG.Z)) {
-            nextPc = target;
-          }
-          break;
-        case 0xD8:
-          setFlag(cpu, FLAG.D, false);
-          break;
-        case 0xE0:
-          compare(cpu, cpu.x, cpu.memory[(pc + 1) & 0xFFFF]);
-          data = cpu.memory[(pc + 1) & 0xFFFF];
-          break;
-        case 0xE8:
-          cpu.x = (cpu.x + 1) & 0xFF;
-          setZN(cpu, cpu.x);
-          data = cpu.x;
-          break;
-        case 0xE9:
-          sbc(cpu, cpu.memory[(pc + 1) & 0xFFFF]);
-          data = cpu.a;
-          break;
-        case 0xEA:
-          break;
-        case 0xF0:
-          target = (pc + 2 + signedByte(cpu.memory[(pc + 1) & 0xFFFF])) & 0xFFFF;
-          if (getFlag(cpu, FLAG.Z)) {
-            nextPc = target;
-          }
-          break;
-        case 0xF8:
-          setFlag(cpu, FLAG.D, true);
-          break;
-        default:
-          cpu.halted = true;
-          note = "Unsupported opcode $" + hex(opcode, 2);
-          break;
-      }
-
-      cpu.pc = nextPc & 0xFFFF;
-      cpu.cycles += 1;
-      cpu.lastStep = {
-        pc,
-        opcode,
-        bytes,
-        mnemonic: meta[0],
-        operandText: formatOperand(cpu, opcode, pc),
-        phase: cpu.halted ? "Halted" : "Execute",
-        target,
-        data,
-        note
-      };
-      if (note && note !== "RTS" && note !== "BRK") {
-        appendMonitor("; " + note);
-      }
-    }
-
-    function currentInstruction(cpu) {
-      if (!cpu || !cpu.lastStep) {
-        return "READY";
-      }
-      const parts = [cpu.lastStep.mnemonic, cpu.lastStep.operandText].filter(Boolean);
-      return parts.join(" ");
-    }
-
-    function statusBits(cpu) {
-      return [
-        getFlag(cpu, FLAG.N),
-        getFlag(cpu, FLAG.V),
-        "-",
-        getFlag(cpu, FLAG.B),
-        getFlag(cpu, FLAG.D),
-        getFlag(cpu, FLAG.I),
-        getFlag(cpu, FLAG.Z),
-        getFlag(cpu, FLAG.C)
-      ].join("");
-    }
-
-    function memoryWindow(cpu) {
-      const base = Math.max(0, Math.min(0xFFF8, (cpu.lastStep && cpu.lastStep.target != null ? cpu.lastStep.target : cpu.pc) - 3));
-      const lines = [];
-      for (let index = 0; index < 8; index += 1) {
-        const address = (base + index) & 0xFFFF;
-        lines.push(hex(address, 4) + ": " + hex(cpu.memory[address], 2));
-      }
-      return lines.join("\n");
-    }
-
-    function stackWindow(cpu) {
-      const lines = [];
-      const start = cpu.sp === 0xFF ? 0x01FF : Math.min(0x01FF, 0x0100 + cpu.sp + 1);
-      for (let index = 0; index < 5; index += 1) {
-        const address = Math.max(0x0100, start - index);
-        lines.push(hex(address, 4) + ": " + hex(cpu.memory[address], 2));
-      }
-      return lines.join("\n");
-    }
-
-    function disassemble(bytes, address, limit) {
-      const lines = [];
-      let pc = address;
-      let offset = 0;
-      while (offset < bytes.length && lines.length < limit) {
-        const opcode = bytes[offset];
-        const meta = OPCODES[opcode] || ["???", "imp", 1];
-        const length = Math.min(meta[2], bytes.length - offset);
-        const chunk = bytes.slice(offset, offset + length);
-        const byteText = chunk.map((byte) => hex(byte, 2)).join(" ").padEnd(8, " ");
-        let operand = "";
-        if (meta[1] === "imm") {
-          operand = "#$" + hex(chunk[1] || 0, 2);
-        } else if (meta[1] === "zp") {
-          operand = "$" + hex(chunk[1] || 0, 2);
-        } else if (meta[1] === "abs") {
-          operand = "$" + hex((chunk[1] || 0) | ((chunk[2] || 0) << 8), 4);
-        } else if (meta[1] === "abs,X") {
-          operand = "$" + hex((chunk[1] || 0) | ((chunk[2] || 0) << 8), 4) + ",X";
-        } else if (meta[1] === "rel") {
-          operand = "$" + hex((pc + 2 + signedByte(chunk[1] || 0)) & 0xFFFF, 4);
-        } else if (meta[1] === "A") {
-          operand = "A";
-        }
-        lines.push(hex(pc, 4) + "  " + byteText + "  " + meta[0] + (operand ? " " + operand : ""));
-        pc = (pc + length) & 0xFFFF;
-        offset += length;
-      }
-      return lines.join("\n");
-    }
-
-    function renderDisassembly() {
-      const program = app.currentProgram;
-      const bytes = Array.from(app.cpu.memory.slice(program.address, program.address + program.bytes.length));
-      document.getElementById("disassembly").textContent = disassemble(bytes, program.address, 80);
-    }
-
-    function renderMemoryReadout() {
-      const cpu = app.cpu;
-      const text = [
-        "A=$" + hex(cpu.a, 2) + " X=$" + hex(cpu.x, 2) + " Y=$" + hex(cpu.y, 2) + " SP=$" + hex(cpu.sp, 2),
-        "PC=$" + hex(cpu.pc, 4) + "  P=" + statusBits(cpu) + "  cycles=" + cpu.cycles,
-        "",
-        "Memory near bus:",
-        memoryWindow(cpu),
-        "",
-        "Output:",
-        cpu.output || "(no ROM output yet)",
-        "",
-        "Graphics/ROM calls:",
-        cpu.graphicsLog.slice(-7).join("\n") || "(none)"
-      ].join("\n");
-      document.getElementById("memoryReadout").textContent = text;
-    }
-
-    function renderStatus() {
-      const cpu = app.cpu;
-      const status = document.getElementById("statusLine");
-      const mode = cpu.halted ? "Halted" : app.running ? "Running" : "Ready";
-      status.innerHTML = mode + " <b>" + app.currentProgram.file + "</b> PC $" + hex(cpu.pc, 4) + " - " + currentInstruction(cpu);
-      document.getElementById("monitorMode").textContent = mode.toUpperCase();
-    }
-
-    function renderCatalog(entries, sourceLabel) {
-      const rows = ["DISK VOLUME 254", ""];
-      entries.forEach((entry) => {
-        rows.push((entry.locked ? "*" : " ") + entry.type + " " + String(entry.sectors).padStart(3, "0") + " " + entry.name);
-      });
-      document.getElementById("catalogList").textContent = rows.join("\n");
-      document.getElementById("diskStatus").textContent = sourceLabel;
-    }
-
-    function appendMonitor(line) {
-      const monitor = document.getElementById("monitorLog");
-      const existing = monitor.textContent ? monitor.textContent.split("\n") : [];
-      existing.push(line);
-      while (existing.length > 120) {
-        existing.shift();
-      }
-      monitor.textContent = existing.join("\n");
-      monitor.scrollTop = monitor.scrollHeight;
-    }
-
-    function setInitialMonitor() {
-      document.getElementById("monitorLog").textContent = [
-        "WOULD YOU LIKE TO LOAD A PROGRAM",
-        "FROM DISK (Y/N)? Y",
-        "",
-        "ENTER PROGRAM NAME: " + app.currentProgram.file,
-        "",
-        "YOUR PROGRAM LOADED AT:  $" + hex(app.currentProgram.address, 4),
-        "",
-        "WOULD YOU LIKE TO SET UP ANY REGISTERS (Y/N)? N",
-        "",
-        "TYPE CONTROL-Y TO START TRACING.",
-        "",
-        "]BRUN THE 6502 SIMULATOR"
-      ].join("\n");
-    }
-
-    function refreshAll() {
-      if (app.scene) {
-        app.scene.setCpu(app.cpu);
-      }
-      renderMemoryReadout();
-      renderDisassembly();
-      renderStatus();
-    }
-
-    function stopRun() {
-      app.running = false;
-      if (app.runTimer) {
-        window.clearInterval(app.runTimer);
-        app.runTimer = null;
-      }
-      document.getElementById("runButton").textContent = "Run";
-      renderStatus();
-    }
-
-    function runLoop() {
-      if (app.running) {
-        stopRun();
-        return;
-      }
-      app.running = true;
-      document.getElementById("runButton").textContent = "Pause";
-      const tick = () => {
-        if (app.cpu.halted) {
-          appendMonitor("* HALTED AT $" + hex(app.cpu.pc, 4));
-          stopRun();
-          refreshAll();
-          return;
-        }
-        stepCpu(app.cpu);
-        refreshAll();
-      };
-      tick();
-      const speed = Number(document.getElementById("speedRange").value);
-      app.runTimer = window.setInterval(tick, speed);
-      renderStatus();
-    }
-
-    function loadProgram(program, preserveSource) {
-      stopRun();
-      app.currentProgram = program;
-      resetCpuWithProgram(program);
-      if (!preserveSource) {
-        document.getElementById("sourceEditor").value = program.source;
-      }
-      appendMonitor("]BLOAD " + program.file);
-      appendMonitor("YOUR PROGRAM LOADED AT:  $" + hex(program.address, 4));
-      refreshAll();
-    }
-
-    function parseNumber(token, labels) {
-      const clean = token.replace(/[,)]$/, "").trim();
-      if (!clean) {
-        throw new Error("Missing numeric operand.");
-      }
-      if (clean in labels) {
-        return labels[clean];
-      }
-      if (clean.startsWith("$")) {
-        return parseInt(clean.slice(1), 16);
-      }
-      if (/^[0-9]+$/.test(clean)) {
-        return parseInt(clean, 10);
-      }
-      throw new Error("Unknown symbol: " + clean);
-    }
-
-    function stripComment(line) {
-      const semicolon = line.indexOf(";");
-      return semicolon >= 0 ? line.slice(0, semicolon) : line;
-    }
-
-    function splitAsmLine(line) {
-      const source = stripComment(line).trim();
-      if (!source || source.startsWith("*")) {
-        return null;
-      }
-      const parts = source.split(/\s+/);
-      const first = parts[0].toUpperCase();
-      const mnemonics = new Set(["ORG", "EQU", "LDA", "LDX", "LDY", "STA", "ASL", "INX", "DEX", "DEY", "CPX", "CMP", "BNE", "BEQ", "BMI", "JSR", "JMP", "RTS", "NOP", "BRK", "ADC", "SBC", "CLC", "SEC", "SED", "CLD", "AND", "BIT"]);
-      const directives = new Set(["LST", "SBTL", "REP", "SKP"]);
-      if (directives.has(first)) {
-        return { directive: first };
-      }
-      let label = "";
-      let op = first;
-      if (!mnemonics.has(first)) {
-        label = parts.shift().replace(/:$/, "").toUpperCase();
-        op = (parts.shift() || "").toUpperCase();
-      } else {
-        parts.shift();
-      }
-      const operand = parts.join(" ").trim();
-      return { label, op, operand };
-    }
-
-    function operandToken(operand) {
-      const trimmed = operand.trim();
-      if (!trimmed) {
-        return "";
-      }
-      if (trimmed.startsWith("(")) {
-        const close = trimmed.indexOf(")");
-        return close >= 0 ? trimmed.slice(0, close + 3).replace(/\s+/g, "") : trimmed;
-      }
-      return trimmed.split(/\s+/)[0].replace(/,$/, "");
-    }
-
-    function instructionSize(op, operand, labels) {
-      if (["RTS", "NOP", "BRK", "CLC", "SEC", "SED", "CLD", "INX", "DEX", "DEY"].includes(op)) {
-        return 1;
-      }
-      if (op === "ASL") {
-        return 1;
-      }
-      if (["BNE", "BEQ", "BMI"].includes(op)) {
-        return 2;
-      }
-      const token = operandToken(operand).toUpperCase();
-      if (token.startsWith("#")) {
-        return 2;
-      }
-      if (token.endsWith(",X")) {
-        return 3;
-      }
-      if (token.startsWith("(")) {
-        return 2;
-      }
-      if (["JSR", "JMP", "BIT"].includes(op)) {
-        return 3;
-      }
+    async function mountDisk() {
       try {
-        const value = parseNumber(token, labels);
-        return value <= 0xFF ? 2 : 3;
+        if (mountTimer) {
+          window.clearInterval(mountTimer);
+          mountTimer = null;
+        }
+        setStatus("Reading local disk image.");
+        const data = await fetchDiskBytes();
+        let attempts = 0;
+        const postDisk = () => {
+          attempts += 1;
+          emulator.contentWindow.postMessage({
+            type: "loadDisk",
+            filename: DISK_IMAGE_NAME,
+            data
+          }, APPLE2TS_ORIGIN);
+          setStatus("Mounted " + DISK_IMAGE_NAME + " (" + data.length + " bytes).");
+          if (attempts >= POST_ATTEMPTS) {
+            window.clearInterval(mountTimer);
+            mountTimer = null;
+          }
+        };
+        mountTimer = window.setInterval(postDisk, 1500);
+        postDisk();
       } catch (error) {
-        return 3;
+        setStatus("Disk load failed: " + error.message, true);
       }
     }
 
-    function assembleSource(text) {
-      const parsed = text.split(/\r?\n/).map(splitAsmLine);
-      const labels = {};
-      let pc = 0x0300;
-      let start = pc;
-      for (const line of parsed) {
-        if (!line || line.directive) {
-          continue;
+    if (!redirectLoopbackToLocalhost()) {
+      emulator.addEventListener("load", () => {
+        window.setTimeout(mountDisk, 500);
+      });
+      reloadButton.addEventListener("click", mountDisk);
+      loadEmulator();
+      window.setTimeout(() => {
+        if (!/Mounted|failed|Reading/.test(statusLine.textContent)) {
+          mountDisk();
         }
-        if (line.op === "ORG") {
-          pc = parseNumber(operandToken(line.operand), labels);
-          start = pc;
-          continue;
-        }
-        if (line.label && line.op === "EQU") {
-          labels[line.label] = parseNumber(operandToken(line.operand), labels);
-          continue;
-        }
-        if (line.label) {
-          labels[line.label] = pc;
-        }
-        if (line.op) {
-          pc += instructionSize(line.op, line.operand, labels);
-        }
-      }
-
-      pc = start;
-      const bytes = [];
-      const emit = (value) => bytes.push(value & 0xFF);
-      const emit16 = (value) => {
-        emit(value);
-        emit(value >> 8);
-      };
-      const zeroOrAbsolute = (zpOpcode, absOpcode, token) => {
-        const value = parseNumber(token, labels);
-        if (value <= 0xFF) {
-          emit(zpOpcode);
-          emit(value);
-          pc += 2;
-        } else {
-          emit(absOpcode);
-          emit16(value);
-          pc += 3;
-        }
-      };
-
-      for (const line of parsed) {
-        if (!line || line.directive || line.op === "EQU") {
-          continue;
-        }
-        if (line.op === "ORG") {
-          pc = parseNumber(operandToken(line.operand), labels);
-          continue;
-        }
-        const op = line.op;
-        const tokenRaw = operandToken(line.operand);
-        const token = tokenRaw.toUpperCase();
-        if (!op) {
-          continue;
-        }
-        if (op === "LDA" && token.startsWith("#")) {
-          emit(0xA9); emit(parseNumber(token.slice(1), labels)); pc += 2;
-        } else if (op === "LDA" && token.endsWith(",X")) {
-          emit(0xBD); emit16(parseNumber(token.slice(0, -2), labels)); pc += 3;
-        } else if (op === "LDA") {
-          zeroOrAbsolute(0xA5, 0xAD, token);
-        } else if (op === "LDX" && token.startsWith("#")) {
-          emit(0xA2); emit(parseNumber(token.slice(1), labels)); pc += 2;
-        } else if (op === "LDX") {
-          zeroOrAbsolute(0xA6, 0xAE, token);
-        } else if (op === "LDY" && token.startsWith("#")) {
-          emit(0xA0); emit(parseNumber(token.slice(1), labels)); pc += 2;
-        } else if (op === "STA" && token.endsWith(",X")) {
-          emit(0x9D); emit16(parseNumber(token.slice(0, -2), labels)); pc += 3;
-        } else if (op === "STA" && token.startsWith("(")) {
-          emit(0x91); emit(parseNumber(token.replace(/[()]/g, "").replace(",Y", ""), labels)); pc += 2;
-        } else if (op === "STA") {
-          zeroOrAbsolute(0x85, 0x8D, token);
-        } else if (op === "ASL") {
-          emit(0x0A); pc += 1;
-        } else if (op === "INX") {
-          emit(0xE8); pc += 1;
-        } else if (op === "DEX") {
-          emit(0xCA); pc += 1;
-        } else if (op === "DEY") {
-          emit(0x88); pc += 1;
-        } else if (op === "CPX" && token.startsWith("#")) {
-          emit(0xE0); emit(parseNumber(token.slice(1), labels)); pc += 2;
-        } else if (op === "CMP" && token.startsWith("#")) {
-          emit(0xC9); emit(parseNumber(token.slice(1), labels)); pc += 2;
-        } else if (op === "CMP") {
-          zeroOrAbsolute(0xC5, 0xCD, token);
-        } else if (["BNE", "BEQ", "BMI"].includes(op)) {
-          const opcodes = { BNE: 0xD0, BEQ: 0xF0, BMI: 0x30 };
-          const target = parseNumber(token, labels);
-          const relative = (target - (pc + 2)) & 0xFF;
-          emit(opcodes[op]);
-          emit(relative);
-          pc += 2;
-        } else if (op === "JSR") {
-          emit(0x20); emit16(parseNumber(token, labels)); pc += 3;
-        } else if (op === "JMP") {
-          emit(0x4C); emit16(parseNumber(token, labels)); pc += 3;
-        } else if (op === "RTS") {
-          emit(0x60); pc += 1;
-        } else if (op === "NOP") {
-          emit(0xEA); pc += 1;
-        } else if (op === "BRK") {
-          emit(0x00); pc += 1;
-        } else if (op === "ADC" && token.startsWith("#")) {
-          emit(0x69); emit(parseNumber(token.slice(1), labels)); pc += 2;
-        } else if (op === "SBC" && token.startsWith("#")) {
-          emit(0xE9); emit(parseNumber(token.slice(1), labels)); pc += 2;
-        } else if (op === "AND" && token.startsWith("#")) {
-          emit(0x29); emit(parseNumber(token.slice(1), labels)); pc += 2;
-        } else if (op === "BIT") {
-          emit(0x2C); emit16(parseNumber(token, labels)); pc += 3;
-        } else if (op === "CLC") {
-          emit(0x18); pc += 1;
-        } else if (op === "SEC") {
-          emit(0x38); pc += 1;
-        } else if (op === "SED") {
-          emit(0xF8); pc += 1;
-        } else if (op === "CLD") {
-          emit(0xD8); pc += 1;
-        } else {
-          throw new Error("Assembler does not support: " + op + " " + tokenRaw);
-        }
-      }
-
-      return {
-        id: "CUSTOM",
-        file: "CUSTOM.OBJ0",
-        title: "CUSTOM - assembled source",
-        address: start,
-        bytes,
-        source: text
-      };
+      }, 4500);
     }
-
-    class CpuDiagramScene extends Phaser.Scene {
-      constructor() {
-        super("CpuDiagramScene");
-        this.cpu = null;
-        this.labels = {};
-        this.flash = 0;
-        this.packetT = 0;
-        this.lastDrawKey = "";
-        this.needsDraw = true;
-      }
-
-      create() {
-        this.gfx = this.add.graphics();
-        this.makeLabels();
-        this.setCpu(app.cpu);
-        app.scene = this;
-        refreshAll();
-      }
-
-      makeText(key, x, y, text, size, color, originX, originY) {
-        const label = this.add.text(x, y, text, {
-          fontFamily: "Cascadia Mono, Consolas, monospace",
-          fontSize: String(size || 22) + "px",
-          color: color || "#63ffbd",
-          resolution: 2
-        });
-        label.setOrigin(originX == null ? 0 : originX, originY == null ? 0 : originY);
-        this.labels[key] = label;
-        return label;
-      }
-
-      makeLabels() {
-        this.makeText("titleFlags", 151, 82, "NV-BDIZC", 25, null, 0.5, 0);
-        this.makeText("flags", 151, 141, "00000000", 25, null, 0.5, 0.5);
-        this.makeText("pLabel", 151, 180, "P Status", 22, null, 0.5, 0.5);
-        this.makeText("pcLabel", 74, 284, "PC", 26, null, 0.5, 0.5);
-        this.makeText("pc", 182, 285, "0300", 25, null, 0.5, 0.5);
-        this.makeText("addr", 182, 550, "0300", 24, null, 0.5, 0.5);
-        this.makeText("addrLabel", 182, 592, "Address", 24, null, 0.5, 0.5);
-        this.makeText("addrReg", 398, 351, "0300", 24, null, 0.5, 0.5);
-        this.makeText("addrRegLabel", 398, 316, "Address Register", 24, null, 0.5, 0.5);
-        this.makeText("memTitle", 447, 404, "Memory", 25, null, 0.5, 0.5);
-        this.makeText("memory", 350, 452, "0300: 00", 22);
-        this.makeText("accBits", 484, 152, "0000 0000", 26, null, 0.5, 0.5);
-        this.makeText("accHex", 417, 212, "00", 25, null, 0.5, 0.5);
-        this.makeText("accLabel", 463, 212, "Accumulator", 22, null, 0, 0.5);
-        this.makeText("alu", 705, 118, "ALU", 27, null, 0.5, 0.5);
-        this.makeText("x", 885, 149, "00", 26, null, 0.5, 0.5);
-        this.makeText("xLabel", 934, 149, "X reg.", 24, null, 0, 0.5);
-        this.makeText("y", 885, 239, "00", 26, null, 0.5, 0.5);
-        this.makeText("yLabel", 934, 239, "Y reg.", 24, null, 0, 0.5);
-        this.makeText("decoder", 888, 343, "READY", 23, null, 0.5, 0.5);
-        this.makeText("decoderLabel", 888, 390, "Decoder", 24, null, 0.5, 0.5);
-        this.makeText("stack", 808, 456, "01FF: FF", 23);
-        this.makeText("stackLabel", 892, 626, "Stack", 24, null, 0.5, 0.5);
-        this.makeText("data", 727, 549, "00", 25, null, 0.5, 0.5);
-        this.makeText("dataLabel", 727, 594, "Data", 24, null, 0.5, 0.5);
-        this.makeText("phaseFetch", 695, 635, "Fetch", 24, null, 0.5, 0.5);
-        this.makeText("phaseExec", 695, 685, "Execute", 24, null, 0.5, 0.5);
-        this.makeText("hint", 48, 646, "Press SPACE to pause", 20, "#7dfbd0");
-      }
-
-      setCpu(cpu) {
-        this.cpu = cpu;
-        this.needsDraw = true;
-        if (this.labels.flags) {
-          this.updateLabels();
-        }
-      }
-
-      updateLabels() {
-        const cpu = this.cpu;
-        if (!cpu) {
-          return;
-        }
-        this.labels.flags.setText(statusBits(cpu));
-        this.labels.pc.setText(hex(cpu.pc, 4));
-        const busAddress = cpu.lastStep && cpu.lastStep.target != null ? cpu.lastStep.target : cpu.pc;
-        this.labels.addr.setText(hex(busAddress & 0xFFFF, 4));
-        this.labels.addrReg.setText(hex(busAddress & 0xFFFF, 4));
-        this.labels.accBits.setText(cpu.a.toString(2).padStart(8, "0").replace(/(.{4})/, "$1 "));
-        this.labels.accHex.setText(hex(cpu.a, 2));
-        this.labels.x.setText(hex(cpu.x, 2));
-        this.labels.y.setText(hex(cpu.y, 2));
-        const instruction = currentInstruction(cpu);
-        this.labels.decoder.setText(instruction.length > 14 ? instruction.slice(0, 13) + "." : instruction);
-        this.labels.data.setText(hex(cpu.lastStep && cpu.lastStep.data != null ? cpu.lastStep.data : cpu.memory[cpu.pc], 2));
-        this.labels.memory.setText(memoryWindow(cpu));
-        this.labels.stack.setText(stackWindow(cpu));
-        this.labels.phaseFetch.setColor(cpu.lastStep && cpu.lastStep.phase === "Fetch" ? "#f4c75f" : "#63ffbd");
-        this.labels.phaseExec.setColor(cpu.lastStep && cpu.lastStep.phase !== "Fetch" ? "#f4c75f" : "#63ffbd");
-      }
-
-      update(time) {
-        const animate = this.shouldAnimate();
-        this.flash = animate ? (Math.sin(time / 180) + 1) / 2 : 0;
-        this.packetT = animate ? (time % 1600) / 1600 : 0;
-        const cpu = this.cpu;
-        const drawKey = [
-          animate ? Math.floor(time / 90) : "static",
-          app.running,
-          cpu ? cpu.cycles : "none",
-          cpu ? cpu.halted : "none",
-          cpu && cpu.lastStep ? cpu.lastStep.mnemonic : "none"
-        ].join(":");
-        if (this.needsDraw || drawKey !== this.lastDrawKey) {
-          this.drawDiagram();
-          this.updateLabels();
-          this.lastDrawKey = drawKey;
-          this.needsDraw = false;
-        }
-      }
-
-      shouldAnimate() {
-        const cpu = this.cpu;
-        return Boolean(app.running && cpu && !cpu.halted && cpu.lastStep && cpu.lastStep.mnemonic !== "READY");
-      }
-
-      line(points, color, alpha, width) {
-        this.gfx.lineStyle(width || 3, color || GREEN_HEX, alpha == null ? 1 : alpha);
-        this.gfx.beginPath();
-        this.gfx.moveTo(points[0], points[1]);
-        for (let index = 2; index < points.length; index += 2) {
-          this.gfx.lineTo(points[index], points[index + 1]);
-        }
-        this.gfx.strokePath();
-      }
-
-      box(x, y, w, h, color, alpha, width) {
-        this.gfx.lineStyle(width || 3, color || GREEN_HEX, alpha == null ? 1 : alpha);
-        this.gfx.strokeRect(x, y, w, h);
-      }
-
-      highlightBox(x, y, w, h, active) {
-        if (!active) {
-          return;
-        }
-        const pulse = this.shouldAnimate() ? this.flash : 0;
-        this.gfx.fillStyle(AMBER_HEX, 0.07 + pulse * 0.06);
-        this.gfx.fillRect(x, y, w, h);
-        this.box(x, y, w, h, AMBER_HEX, 0.72 + pulse * 0.2, 4);
-      }
-
-      pathPoint(points, progress) {
-        const lengths = [];
-        let total = 0;
-        for (let index = 2; index < points.length; index += 2) {
-          const dx = points[index] - points[index - 2];
-          const dy = points[index + 1] - points[index - 1];
-          const length = Math.hypot(dx, dy);
-          lengths.push(length);
-          total += length;
-        }
-        let distance = (progress % 1) * total;
-        for (let index = 0; index < lengths.length; index += 1) {
-          if (distance <= lengths[index]) {
-            const start = index * 2;
-            const ratio = lengths[index] === 0 ? 0 : distance / lengths[index];
-            return {
-              x: points[start] + (points[start + 2] - points[start]) * ratio,
-              y: points[start + 1] + (points[start + 3] - points[start + 1]) * ratio
-            };
-          }
-          distance -= lengths[index];
-        }
-        return { x: points[points.length - 2], y: points[points.length - 1] };
-      }
-
-      packet(points, offset) {
-        const point = this.pathPoint(points, this.packetT + offset);
-        this.gfx.fillStyle(AMBER_HEX, 0.9);
-        this.gfx.fillCircle(point.x, point.y, 5);
-      }
-
-      drawDiagram() {
-        const cpu = this.cpu;
-        const active = cpu && cpu.lastStep ? cpu.lastStep.mnemonic : "";
-        const animate = this.shouldAnimate();
-        this.gfx.clear();
-        this.gfx.fillStyle(0x010303, 1);
-        this.gfx.fillRect(0, 0, 1024, 720);
-
-        this.line([256, 141, 300, 141, 300, 550, 332, 550], GREEN_HEX, 0.88);
-        this.line([246, 285, 300, 285], GREEN_HEX, 0.88);
-        this.line([246, 550, 332, 550], GREEN_HEX, 0.88);
-        this.line([300, 351, 333, 351], GREEN_HEX, 0.88);
-        this.line([460, 351, 740, 351, 740, 343, 790, 343], GREEN_HEX, 0.88);
-        this.line([562, 550, 690, 550], GREEN_HEX, 0.88);
-        this.line([587, 152, 620, 152], GREEN_HEX, 0.88);
-        this.line([790, 145, 850, 145], GREEN_HEX, 0.88);
-        this.line([790, 235, 850, 235], GREEN_HEX, 0.88);
-        this.line([705, 228, 705, 520], GREEN_HEX, 0.88);
-        this.line([764, 550, 790, 550], GREEN_HEX, 0.88);
-
-        if (animate) {
-          const busGlow = 0.22 + this.flash * 0.38;
-          this.line([182, 310, 182, 550, 332, 550], BLUE_HEX, busGlow, 5);
-          this.line([562, 550, 690, 550], BLUE_HEX, busGlow, 5);
-          this.packet([182, 310, 182, 550, 332, 550], 0);
-          this.packet([562, 550, 690, 550], 0.35);
-        }
-
-        this.box(46, 117, 210, 48);
-        this.box(118, 260, 128, 50);
-        this.box(118, 525, 128, 50);
-        this.box(332, 430, 230, 220);
-        this.box(382, 128, 205, 48);
-        this.box(382, 188, 70, 48);
-        this.box(620, 88, 170, 140);
-        this.box(850, 125, 70, 48);
-        this.box(850, 215, 70, 48);
-        this.box(790, 314, 195, 58);
-        this.box(790, 432, 205, 180);
-        this.box(690, 520, 74, 58);
-        this.box(610, 614, 170, 42);
-        this.box(610, 664, 170, 42);
-        this.box(333, 327, 130, 48);
-
-        this.highlightBox(382, 128, 205, 108, ["LDA", "ADC", "SBC", "AND", "ASL", "TYA", "CMP", "BIT"].includes(active));
-        this.highlightBox(850, 125, 70, 48, ["LDX", "INX", "DEX", "CPX"].includes(active));
-        this.highlightBox(850, 215, 70, 48, ["LDY", "DEY"].includes(active));
-        this.highlightBox(332, 430, 230, 220, ["STA", "LDA", "CMP", "DEC"].includes(active));
-        this.highlightBox(790, 314, 195, 58, Boolean(active && active !== "READY"));
-        this.highlightBox(610, 614, 170, 42, active !== "READY" && cpu && cpu.lastStep && cpu.lastStep.phase === "Fetch");
-        this.highlightBox(610, 664, 170, 42, cpu && cpu.lastStep && cpu.lastStep.phase !== "Fetch");
-      }
-    }
-
-    function installControls() {
-      const select = document.getElementById("exampleSelect");
-      PROGRAMS.forEach((program) => {
-        const option = document.createElement("option");
-        option.value = program.id;
-        option.textContent = program.title;
-        select.appendChild(option);
-      });
-      select.value = app.currentProgram.id;
-
-      document.getElementById("loadButton").addEventListener("click", () => {
-        const program = PROGRAMS.find((item) => item.id === select.value) || PROGRAMS[0];
-        loadProgram(program, false);
-      });
-
-      document.getElementById("stepButton").addEventListener("click", () => {
-        stopRun();
-        stepCpu(app.cpu);
-        appendMonitor("*" + hex(app.cpu.lastStep.pc, 4) + "  " + currentInstruction(app.cpu));
-        refreshAll();
-      });
-
-      document.getElementById("runButton").addEventListener("click", runLoop);
-
-      document.getElementById("resetButton").addEventListener("click", () => {
-        loadProgram(app.currentProgram, true);
-      });
-
-      document.getElementById("traceButton").addEventListener("click", () => {
-        app.tracePromptVisible = !app.tracePromptVisible;
-        appendMonitor(app.tracePromptVisible ? "TYPE CONTROL-Y TO START TRACING." : "TRACE PROMPT CLEARED.");
-      });
-
-      document.getElementById("assembleButton").addEventListener("click", () => {
-        try {
-          const source = document.getElementById("sourceEditor").value;
-          const program = assembleSource(source);
-          loadProgram(program, true);
-          app.currentProgram.source = source;
-          appendMonitor("* ASSEMBLED " + program.bytes.length + " BYTES");
-        } catch (error) {
-          appendMonitor("ASSEMBLER ERROR: " + error.message);
-        }
-      });
-
-      document.getElementById("speedRange").addEventListener("input", () => {
-        if (app.running) {
-          stopRun();
-          runLoop();
-        }
-      });
-
-      document.querySelectorAll(".tab-button").forEach((button) => {
-        button.addEventListener("click", () => {
-          document.querySelectorAll(".tab-button").forEach((item) => item.classList.remove("active"));
-          button.classList.add("active");
-          const tab = button.dataset.tab;
-          document.getElementById("sourceTab").classList.toggle("active", tab === "source");
-          document.getElementById("disasmTab").classList.toggle("active", tab === "disasm");
-          document.getElementById("catalogTab").classList.toggle("active", tab === "catalog");
-        });
-      });
-
-      document.getElementById("diskFile").addEventListener("change", (event) => {
-        const file = event.target.files && event.target.files[0];
-        if (!file) {
-          return;
-        }
-        file.arrayBuffer()
-          .then(parseDos33Catalog)
-          .then((entries) => {
-            app.parsedCatalog = entries;
-            renderCatalog(entries, "Parsed catalog from " + file.name + ".");
-            appendMonitor("*CATALOG FROM " + file.name);
-          })
-          .catch((error) => {
-            appendMonitor("DISK ERROR: " + error.message);
-          });
-      });
-
-      window.addEventListener("keydown", (event) => {
-        if (event.target && ["TEXTAREA", "INPUT", "SELECT"].includes(event.target.tagName)) {
-          return;
-        }
-        if (event.code === "Space") {
-          event.preventDefault();
-          if (app.running) {
-            stopRun();
-          } else {
-            stepCpu(app.cpu);
-            refreshAll();
-          }
-        }
-      });
-    }
-
-    function tryAutoLoadDisk() {
-      fetch(encodeURI(DISK_IMAGE_NAME))
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("HTTP " + response.status);
-          }
-          return response.arrayBuffer();
-        })
-        .then(parseDos33Catalog)
-        .then((entries) => {
-          app.parsedCatalog = entries;
-          renderCatalog(entries, "Parsed DOS 3.3 catalog from " + DISK_IMAGE_NAME + ".");
-        })
-        .catch(() => {
-          renderCatalog(DEFAULT_CATALOG, "Using embedded catalog copied from the provided disk image.");
-        });
-    }
-
-    function boot() {
-      if (!window.Phaser) {
-        document.getElementById("game").innerHTML = "<div class=\"phaser-error\">Phaser could not be loaded. Serve this folder with network access or add a local Phaser build.</div>";
-        return;
-      }
-      resetCpuWithProgram(app.currentProgram);
-      document.getElementById("sourceEditor").value = app.currentProgram.source;
-      setInitialMonitor();
-      renderCatalog(DEFAULT_CATALOG, "Using embedded catalog copied from the provided disk image.");
-      installControls();
-      refreshAll();
-      const config = {
-        type: Phaser.AUTO,
-        parent: "game",
-        backgroundColor: "#010303",
-        width: 1024,
-        height: 720,
-        scale: {
-          mode: Phaser.Scale.FIT,
-          autoCenter: Phaser.Scale.CENTER_BOTH
-        },
-        render: {
-          antialias: false,
-          pixelArt: true
-        },
-        scene: [CpuDiagramScene]
-      };
-      new Phaser.Game(config);
-      tryAutoLoadDisk();
-    }
-
-    window.addEventListener("DOMContentLoaded", boot);
   </script>
 </body>
 </html>

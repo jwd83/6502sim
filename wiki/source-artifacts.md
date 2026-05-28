@@ -11,9 +11,9 @@ tags:
 
 ## Current Implementation
 
-- [index.html](../index.html) - 1972-line static app containing markup, styles, CPU/assembler/disk logic, Phaser rendering, and controls.
-- [tests/smoke.js](../tests/smoke.js) - Dependency-free Node smoke harness for seeded assembler fixtures and focused CPU execution paths.
-- [frames/app-smoke.png](../frames/app-smoke.png) and [frames/app-smoke-2.png](../frames/app-smoke-2.png) - current port screenshots at 1440x900.
+- [index.html](../index.html) - 299-line static Apple2TS iframe/bootstrap page that mounts the provided disk image by `postMessage`.
+- [tests/smoke.js](../tests/smoke.js) - Dependency-free Node smoke harness for main-page emulator wiring and disk-image size.
+- [frames/app-smoke.png](../frames/app-smoke.png) and [frames/app-smoke-2.png](../frames/app-smoke-2.png) - historical screenshots of the removed recreation app at 1440x900.
 
 ## Original/Reference Artifacts
 
